@@ -16,6 +16,10 @@ import { FaShip } from "react-icons/fa";
 
 import logo from "../assets/logo.png";
 
+import {init_usdpl, target, init_embedded, call_backend} from "usdpl-front";
+
+const USDPL_PORT: number = 54321;
+
 // interface AddMethodArgs {
 //   left: number;
 //   right: number;
@@ -36,6 +40,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
   //     setResult(result.result);
   //   }
   // };
+  
+  // call hello callback on backend
+  (async () => {
+    let response = await call_backend("hello", []);
+    console.log("Backend says:", response);
+  })();
 
   return (
     <PanelSection title="Panel Section">
@@ -93,6 +103,14 @@ export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
     exact: true,
   });
+  
+  // init USDPL WASM frontend
+  // this is required to interface with the backend
+  (async () => {
+    await init_embedded();
+    init_usdpl(USDPL_PORT);
+    console.log("USDPL started for framework: " + target());
+  })();
 
   return {
     title: <div className={staticClasses.Title}>Example Plugin</div>,

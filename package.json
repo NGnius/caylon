@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "decky-frontend-lib": "^1.0.1",
-    "react-icons": "^4.3.1"
+    "react-icons": "^4.3.1",
+    "usdpl-front": "file:./src/usdpl-front"
   },
   "pnpm": {
     "peerDependencyRules": {
