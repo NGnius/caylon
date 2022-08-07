@@ -36,6 +36,9 @@ mod test {
                 }),
                 ElementConfig::Slider(SliderConfig {
                     title: "Test Slider".into(),
+                    min: 0,
+                    max: 3,
+                    notches: None,
                     on_set: ActionConfig::Command(CommandAction{run: "echo 'hello slider'".into()}),
                 }),
                 ElementConfig::Reading(ReadingConfig {

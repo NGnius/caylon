@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{ButtonConfig, ToggleConfig, SliderConfig, ReadingConfig};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "element")]
 pub enum ElementConfig {
     #[serde(rename = "button")]

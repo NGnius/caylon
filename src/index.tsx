@@ -17,8 +17,7 @@ import { FaShip } from "react-icons/fa";
 import logo from "../assets/logo.png";
 
 import {init_usdpl, target, init_embedded, call_backend} from "usdpl-front";
-
-const USDPL_PORT: number = 54321;
+import * as backend from "./backend";
 
 // interface AddMethodArgs {
 //   left: number;
