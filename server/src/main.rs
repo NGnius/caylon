@@ -1,3 +1,5 @@
+mod config;
+
 use simplelog::{WriteLogger, LevelFilter};
 
 use usdpl_back::Instance;
