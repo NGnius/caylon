@@ -2,27 +2,34 @@ import {
   ButtonItem,
   definePlugin,
   DialogButton,
-  Menu,
-  MenuItem,
+  //Menu,
+  //MenuItem,
   PanelSection,
   PanelSectionRow,
-  Router,
+  //Router,
   ServerAPI,
-  showContextMenu,
+  //showContextMenu,
   staticClasses,
+  SliderField,
+  ToggleField,
+  //NotchLabel
+  gamepadDialogClasses,
+  joinClassNames,
 } from "decky-frontend-lib";
-import { VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { VFC, useState } from "react";
+import { GiWashingMachine } from "react-icons/gi";
 
-import logo from "../assets/logo.png";
-
-import {init_usdpl, target, init_embedded, call_backend} from "usdpl-front";
+import { call_backend } from "usdpl-front";
 import * as backend from "./backend";
 
 // interface AddMethodArgs {
 //   left: number;
 //   right: number;
 // }
+
+const FieldWithSeparator = joinClassNames(gamepadDialogClasses.Field, gamepadDialogClasses.WithBottomSeparatorStandard);
+
+let items: backend.CElement[] = [];
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
   // const [result, setResult] = useState<number | undefined>();
@@ -39,6 +46,16 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
   //     setResult(result.result);
   //   }
   // };
+
+  const [triggerInternal, updateInternal] = useState<boolean>(false);
+
+  function update() {
+    updateInternal(!triggerInternal);
+  }
+
+  function updateIdc(_: any) {
+    update();
+  }
   
   // call hello callback on backend
   (async () => {
@@ -48,41 +65,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
 
   return (
     <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/decky-plugin-test");
-          }}
-        >
-          Router
-        </ButtonItem>
-      </PanelSectionRow>
+      {items.map(
+        (elem, i) => {
+          return <PanelSectionRow>{buildHtmlElement(elem, i, updateIdc)}</PanelSectionRow>
+        })
+      }
     </PanelSection>
   );
 };
@@ -91,12 +78,75 @@ const DeckyPluginRouterTest: VFC = () => {
   return (
     <div style={{ marginTop: "50px", color: "white" }}>
       Hello World!
-      <DialogButton onClick={() => Router.NavigateToStore()}>
+      <DialogButton onClick={() => {}}>
         Go to Store
       </DialogButton>
     </div>
   );
 };
+
+function buildHtmlElement(element: backend.CElement, index: number, updateIdc: any) {
+  switch (element.element) {
+    case "button":
+      return buildButton(element as backend.CButton, index, updateIdc);
+    case "slider":
+      return buildSlider(element as backend.CSlider, index, updateIdc);
+    case "toggle":
+      return buildToggle(element as backend.CToggle, index, updateIdc);
+    case "reading":
+      return buildReading(element as backend.CReading, index, updateIdc);
+  }
+  return "Unsupported";
+}
+
+function buildButton(element: backend.CButton, index: number, updateIdc: any) {
+  return (
+    <ButtonItem
+      layout="below"
+      onClick={() => {backend.resolve(backend.onUpdate(index, null), updateIdc)}}>
+      {element.title}
+    </ButtonItem>
+  );
+}
+
+function buildSlider(element: backend.CSlider, index: number, updateIdc: any) {
+  return (
+    <SliderField
+      label={element.title}
+      value={element.min}
+      max={element.max}
+      min={element.min}
+      showValue={true}
+      onChange={(value: number) => {
+        backend.resolve(backend.onUpdate(index, value), updateIdc)
+      }}
+    />
+  );
+}
+
+function buildToggle(element: backend.CToggle, index: number, updateIdc: any) {
+  return (
+    <ToggleField
+      checked={false}
+      label={element.title}
+      description={element.description!}
+      onChange={(value: boolean) => {
+        backend.resolve(backend.onUpdate(index, value), updateIdc)
+      }}
+    />
+  );
+}
+
+function buildReading(element: backend.CReading, _index: number, _updateIdc: any) {
+  return (
+    <div className={FieldWithSeparator}>
+      <div className={gamepadDialogClasses.FieldLabelRow}>
+        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
+        <div className={gamepadDialogClasses.FieldChildren}>{"idk"}</div>
+      </div>
+    </div>
+  );
+}
 
 export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
@@ -106,15 +156,14 @@ export default definePlugin((serverApi: ServerAPI) => {
   // init USDPL WASM frontend
   // this is required to interface with the backend
   (async () => {
-    await init_embedded();
-    init_usdpl(USDPL_PORT);
-    console.log("USDPL started for framework: " + target());
+    await backend.initBackend();
+    items = await backend.getElements();
   })();
 
   return {
     title: <div className={staticClasses.Title}>Example Plugin</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
+    icon: <GiWashingMachine />,
     onDismount() {
       serverApi.routerHook.removeRoute("/decky-plugin-test");
     },

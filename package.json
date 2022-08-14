@@ -1,7 +1,7 @@
 {
-  "name": "decky-plugin-template",
+  "name": "kaylon",
   "version": "0.0.1",
-  "description": "A template to quickly create decky plugins from scratch, based on TypeScript and webpack",
+  "description": "Better than the Borg",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
     "watch": "rollup -c -w",
@@ -9,21 +9,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SteamDeckHomebrew/decky-plugin-template.git"
+    "url": "git+https://github.com/NGnius/kaylon.git"
   },
   "keywords": [
     "decky",
     "plugin",
-    "plugin-template",
     "steam-deck",
     "deck"
   ],
   "author": "Jonas Dellinger <jonas@dellinger.dev>",
   "license": "GPL-2.0-or-later",
   "bugs": {
-    "url": "https://github.com/SteamDeckHomebrew/decky-plugin-template/issues"
+    "url": "https://github.com/NGnius/kaylon/issues"
   },
-  "homepage": "https://github.com/SteamDeckHomebrew/decky-plugin-template#readme",
+  "homepage": "https://github.com/NGnius/kaylon#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-json": "^4.1.0",
@@ -41,7 +40,7 @@
   "dependencies": {
     "decky-frontend-lib": "^1.0.1",
     "react-icons": "^4.3.1",
-    "usdpl-front": "file:./src/usdpl-front"
+    "usdpl-front": "file:./src/usdpl_front"
   },
   "pnpm": {
     "peerDependencyRules": {

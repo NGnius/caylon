@@ -38,13 +38,13 @@ export type CButton = {
     title: string;
 }
 
-export type CToggle {
+export type CToggle = {
     element: string; // "toggle"
     title: string;
     description: string | null;
 }
 
-export type CSlider {
+export type CSlider = {
     element: string; // "slider"
     title: string;
     min: number;
@@ -52,7 +52,7 @@ export type CSlider {
     notches: string[] | null;
 }
 
-export type CReading {
+export type CReading = {
     element: string; // "reading"
     title: string;
     period_ms: number;
