@@ -6,6 +6,5 @@ use super::ActionConfig;
 pub struct ToggleConfig {
     pub title: String,
     pub description: Option<String>,
-    pub on_enable: ActionConfig,
-    pub on_disable: ActionConfig,
+    pub on_toggle: ActionConfig,
 }

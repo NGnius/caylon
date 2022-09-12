@@ -1,0 +1,57 @@
+{
+  "api-version": "v0.0.0",
+  "items": [
+    {
+      "element": "button",
+      "title": "Test Button",
+      "on_click": {
+        "action": "command",
+        "run": "echo 'hello button'"
+      }
+    },
+    {
+      "element": "toggle",
+      "title": "Test Toggle",
+      "description": "Toggle description",
+      "on_toggle": {
+        "action": "command",
+        "run": "echo 'hello toggle ${KAYLON_VALUE}'"
+      }
+    },
+    {
+      "element": "slider",
+      "title": "Test Slider",
+      "min": 0,
+      "max": 3,
+      "notches": null,
+      "on_set": {
+        "action": "command",
+        "run": "echo 'hello slider'"
+      }
+    },
+    {
+      "element": "reading",
+      "title": "Test Reading",
+      "period_ms": 10000,
+      "on_period": {
+        "action": "command",
+        "run": "echo 'hello reading'"
+      }
+    },
+    {
+      "element": "result-display",
+      "title": "Test Result",
+      "result_of": 1
+    }
+  ],
+  "about": {
+    "name": "Test name",
+    "version": "v0.42.0",
+    "description": "Test description",
+    "url": "https://github.com/NGnius/kaylon",
+    "authors": [
+      "NGnius <ngniusness@gmail.com>"
+    ],
+    "license": "MIT"
+  }
+}

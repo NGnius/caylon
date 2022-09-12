@@ -3,6 +3,28 @@
 version = 3
 
 [[package]]
+name = "async-recursion"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2cda8f4bcc10624c4e85bc66b3f452cca98cfa5ca002dc83a16aad2367641bea"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "async-trait"
+version = "0.1.57"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76464446b8bc32758d7e88ee1a804d9914cd9b1cb264c029899680b0be29826f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -349,10 +371,12 @@ checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
 name = "kaylon"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "log",
  "serde",
  "serde_json",
  "simplelog",
+ "tokio",
  "usdpl-back",
 ]
 
@@ -959,11 +983,12 @@ dependencies = [
 
 [[package]]
 name = "usdpl-back"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbbc0781e83ba990f8239142e33173a2d2548701775f3db66702d1af4fd0319a"
+version = "0.7.0"
 dependencies = [
+ "async-recursion",
+ "async-trait",
  "bytes",
+ "log",
  "tokio",
  "usdpl-core",
  "warp",
@@ -972,8 +997,6 @@ dependencies = [
 [[package]]
 name = "usdpl-core"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "862153581fac266458521f49e5906a71c1eee1665cb4c7d71e9586bd34b45394"
 dependencies = [
  "base64",
 ]

@@ -1,7 +1,7 @@
 import {
   ButtonItem,
   definePlugin,
-  DialogButton,
+  //DialogButton,
   //Menu,
   //MenuItem,
   PanelSection,
@@ -19,69 +19,90 @@ import {
 import { VFC, useState } from "react";
 import { GiWashingMachine } from "react-icons/gi";
 
-import { call_backend } from "usdpl-front";
+import { get_value, set_value } from "usdpl-front";
 import * as backend from "./backend";
-
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
 
 const FieldWithSeparator = joinClassNames(gamepadDialogClasses.Field, gamepadDialogClasses.WithBottomSeparatorStandard);
 
+const DISPLAY_KEY = "display";
+const VALUE_KEY = "value";
+
 let items: backend.CElement[] = [];
+let about: backend.CAbout | null = null;
+
+let update = () => {};
+
+function displayCallback(index: number) {
+  return (newVal: any) => {
+    set_value(DISPLAY_KEY + index.toString(), newVal);
+    backend.resolve(backend.getDisplay(index), displayCallback(index));
+    console.log("Got display for " + index.toString(), newVal);
+    update();
+  }
+}
+
+// init USDPL WASM frontend
+// this is required to interface with the backend
+(async () => {
+  await backend.initBackend();
+  let about_promise = backend.getAbout();
+  let elements_promise = backend.getElements();
+  about = await about_promise;
+  console.log("KAYLON: got about", about);
+  let result = await elements_promise;
+  console.log("KAYLON: got elements", result);
+  if (result != null) {
+    items = await backend.getElements();
+    for (let i = 0; i < items.length; i++) {
+      console.log("KAYLON: req display for item #" + i.toString());
+      backend.resolve(backend.getDisplay(i), displayCallback(i));
+    }
+  } else {
+    console.warn("KAYLON: backend connection failed");
+  }
+})();
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
-  // const [result, setResult] = useState<number | undefined>();
-
-  // const onClick = async () => {
-  //   const result = await serverAPI.callPluginMethod<AddMethodArgs, number>(
-  //     "add",
-  //     {
-  //       left: 2,
-  //       right: 2,
-  //     }
-  //   );
-  //   if (result.success) {
-  //     setResult(result.result);
-  //   }
-  // };
 
   const [triggerInternal, updateInternal] = useState<boolean>(false);
 
-  function update() {
+  update = () => {
     updateInternal(!triggerInternal);
   }
 
   function updateIdc(_: any) {
     update();
   }
-  
-  // call hello callback on backend
-  (async () => {
-    let response = await call_backend("hello", []);
-    console.log("Backend says:", response);
-  })();
 
   return (
-    <PanelSection title="Panel Section">
+    <PanelSection>
       {items.map(
         (elem, i) => {
           return <PanelSectionRow>{buildHtmlElement(elem, i, updateIdc)}</PanelSectionRow>
         })
       }
+      { about != null && buildAbout() }
+      <PanelSectionRow>
+        <ButtonItem
+          layout="below"
+          onClick={(_: MouseEvent) => {
+            backend.resolve(backend.reload(),
+              (reload_items: backend.CElement[]) => {
+                items = reload_items;
+                console.log("KAYLON: got elements", reload_items);
+                update();
+              });
+            backend.resolve(backend.getAbout(),
+              (new_about: backend.CAbout) => {
+                about = new_about;
+                console.log("KAYLON: got about", about);
+                update();
+              });
+          }}>
+          Reload
+        </ButtonItem>
+      </PanelSectionRow>
     </PanelSection>
-  );
-};
-
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => {}}>
-        Go to Store
-      </DialogButton>
-    </div>
   );
 };
 
@@ -95,8 +116,11 @@ function buildHtmlElement(element: backend.CElement, index: number, updateIdc: a
       return buildToggle(element as backend.CToggle, index, updateIdc);
     case "reading":
       return buildReading(element as backend.CReading, index, updateIdc);
+    case "result-display":
+      return buildResultDisplay(element as backend.CResultDisplay, index, updateIdc);
   }
-  return "Unsupported";
+  console.error("KAYLON: Unsupported element", element);
+  return <div>Unsupported</div>;
 }
 
 function buildButton(element: backend.CButton, index: number, updateIdc: any) {
@@ -110,62 +134,175 @@ function buildButton(element: backend.CButton, index: number, updateIdc: any) {
 }
 
 function buildSlider(element: backend.CSlider, index: number, updateIdc: any) {
+  const KEY = VALUE_KEY + index.toString();
+  if (get_value(KEY) == null) {
+    set_value(KEY, element.min);
+  }
   return (
     <SliderField
       label={element.title}
-      value={element.min}
+      value={get_value(KEY)}
       max={element.max}
       min={element.min}
       showValue={true}
       onChange={(value: number) => {
-        backend.resolve(backend.onUpdate(index, value), updateIdc)
+        backend.resolve(backend.onUpdate(index, value), updateIdc);
+        set_value(KEY, value);
       }}
     />
   );
 }
 
 function buildToggle(element: backend.CToggle, index: number, updateIdc: any) {
+  const KEY = VALUE_KEY + index.toString();
+  if (get_value(KEY) == null) {
+    set_value(KEY, false);
+  }
   return (
     <ToggleField
-      checked={false}
+      checked={get_value(KEY)}
       label={element.title}
       description={element.description!}
       onChange={(value: boolean) => {
-        backend.resolve(backend.onUpdate(index, value), updateIdc)
+        backend.resolve(backend.onUpdate(index, value), updateIdc);
+        set_value(KEY, value);
       }}
     />
   );
 }
 
-function buildReading(element: backend.CReading, _index: number, _updateIdc: any) {
+function buildReading(element: backend.CReading, index: number, _updateIdc: any) {
   return (
     <div className={FieldWithSeparator}>
       <div className={gamepadDialogClasses.FieldLabelRow}>
         <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
-        <div className={gamepadDialogClasses.FieldChildren}>{"idk"}</div>
+        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
       </div>
     </div>
   );
 }
 
-export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-    exact: true,
-  });
-  
-  // init USDPL WASM frontend
-  // this is required to interface with the backend
-  (async () => {
-    await backend.initBackend();
-    items = await backend.getElements();
-  })();
+function buildResultDisplay(element: backend.CResultDisplay, index: number, _updateIdc: any) {
+  return (
+    <div className={FieldWithSeparator}>
+      <div className={gamepadDialogClasses.FieldLabelRow}>
+        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
+        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
+      </div>
+    </div>
+  );
+}
 
+function buildAbout() {
+  if (about == null) {
+    return [];
+  } else {
+    let elements = [
+      <div className={staticClasses.PanelSectionTitle}>
+        About
+      </div>,
+      <PanelSectionRow>
+        <div className={FieldWithSeparator}>
+          <div className={gamepadDialogClasses.FieldLabelRow}>
+            <div className={gamepadDialogClasses.FieldLabel}>Name</div>
+            <div className={gamepadDialogClasses.FieldChildren}>{about.name}</div>
+          </div>
+        </div>
+      </PanelSectionRow>,
+      <PanelSectionRow>
+        <div className={FieldWithSeparator}>
+          <div className={gamepadDialogClasses.FieldLabelRow}>
+            <div className={gamepadDialogClasses.FieldLabel}>Version</div>
+            <div className={gamepadDialogClasses.FieldChildren}>{about.version}</div>
+          </div>
+        </div>
+      </PanelSectionRow>,
+      <PanelSectionRow>
+        <div className={FieldWithSeparator}>
+          <div className={gamepadDialogClasses.FieldLabelRow}>
+            <div className={gamepadDialogClasses.FieldLabel}>Description</div>
+            <div className={gamepadDialogClasses.FieldDescription}>{about.description}</div>
+          </div>
+        </div>
+      </PanelSectionRow>
+    ];
+    if (about.url != null) {
+      elements.push(
+        <PanelSectionRow>
+          <div className={FieldWithSeparator}>
+            <div className={gamepadDialogClasses.FieldLabelRow}>
+              <div className={gamepadDialogClasses.FieldLabel}>URL</div>
+              <div className={gamepadDialogClasses.FieldDescription}>{about.url}</div>
+            </div>
+          </div>
+        </PanelSectionRow>
+      );
+    }
+    if (about.authors.length > 1) {
+      let authors = about.authors.map((elem, i) => {
+        if (i == about!.authors.length - 1) {
+          return <p>{elem}</p>;
+        } else {
+          return <span>{elem}</span>;
+        }
+      });
+      elements.push(
+        <PanelSectionRow>
+          <div className={FieldWithSeparator}>
+            <div className={gamepadDialogClasses.FieldLabelRow}>
+              <div className={gamepadDialogClasses.FieldLabel}>Authors</div>
+              <div className={gamepadDialogClasses.FieldDescription}>{authors}</div>
+            </div>
+          </div>
+        </PanelSectionRow>
+      );
+    } else if (about.authors.length == 1) {
+      elements.push(
+        <PanelSectionRow>
+          <div className={FieldWithSeparator}>
+            <div className={gamepadDialogClasses.FieldLabelRow}>
+              <div className={gamepadDialogClasses.FieldLabel}>Author</div>
+              <div className={gamepadDialogClasses.FieldDescription}>{about.authors[0]}</div>
+            </div>
+          </div>
+        </PanelSectionRow>
+      );
+    } else {
+      elements.push(
+        <PanelSectionRow>
+          <div className={FieldWithSeparator}>
+            <div className={gamepadDialogClasses.FieldLabelRow}>
+              <div className={gamepadDialogClasses.FieldLabel}>Author</div>
+              <div className={gamepadDialogClasses.FieldDescription}>NGnius</div>
+            </div>
+          </div>
+        </PanelSectionRow>
+      );
+    }
+
+    if (about.license != null) {
+      elements.push(
+        <PanelSectionRow>
+          <div className={FieldWithSeparator}>
+            <div className={gamepadDialogClasses.FieldLabelRow}>
+              <div className={gamepadDialogClasses.FieldLabel}>License</div>
+              <div className={gamepadDialogClasses.FieldChildren}>{about.license}</div>
+            </div>
+          </div>
+        </PanelSectionRow>
+      );
+    }
+    return elements;
+  }
+}
+
+export default definePlugin((serverApi: ServerAPI) => {
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
+    title: <div className={staticClasses.Title}>{about == null? "Kaylon": about.name}</div>,
     content: <Content serverAPI={serverApi} />,
     icon: <GiWashingMachine />,
     onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
+      //serverApi.routerHook.removeRoute("/decky-plugin-test");
     },
   };
 });

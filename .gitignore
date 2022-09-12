@@ -42,8 +42,8 @@ yalc.lock
 .vscode/settings.json
 
 # ignore Rust compiler files
-/server/target
-backend
+/backend/target
+/backend/out
 /bin
 
 # packaged teasers

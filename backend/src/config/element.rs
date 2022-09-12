@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use super::{ButtonConfig, ToggleConfig, SliderConfig, ReadingConfig};
+use super::{ButtonConfig, ToggleConfig, SliderConfig, ReadingConfig, ResultDisplayConfig};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "element")]
@@ -12,5 +12,7 @@ pub enum ElementConfig {
     #[serde(rename = "slider")]
     Slider(SliderConfig),
     #[serde(rename = "reading")]
-    Reading(ReadingConfig),
+    ReadingDisplay(ReadingConfig),
+    #[serde(rename = "result-display")]
+    ResultDisplay(ResultDisplayConfig),
 }

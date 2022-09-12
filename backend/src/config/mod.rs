@@ -4,6 +4,7 @@ mod base;
 mod button;
 mod element;
 mod reading;
+mod result_display;
 mod slider;
 mod toggle;
 
@@ -13,6 +14,7 @@ pub use base::BaseConfig;
 pub use button::ButtonConfig;
 pub use element::ElementConfig;
 pub use reading::ReadingConfig;
+pub use result_display::ResultDisplayConfig;
 pub use slider::SliderConfig;
 pub use toggle::ToggleConfig;
 
@@ -31,8 +33,7 @@ mod test {
                 ElementConfig::Toggle(ToggleConfig {
                     title: "Test Toggle".into(),
                     description: Some("Toggle description".into()),
-                    on_enable: ActionConfig::Command(CommandAction{run: "echo 'hello toggle 1'".into()}),
-                    on_disable: ActionConfig::Command(CommandAction{run: "echo 'hello toggle 0'".into()}),
+                    on_toggle: ActionConfig::Command(CommandAction{run: "echo 'hello toggle $KAYLON_VALUE'".into()}),
                 }),
                 ElementConfig::Slider(SliderConfig {
                     title: "Test Slider".into(),
@@ -41,10 +42,14 @@ mod test {
                     notches: None,
                     on_set: ActionConfig::Command(CommandAction{run: "echo 'hello slider'".into()}),
                 }),
-                ElementConfig::Reading(ReadingConfig {
+                ElementConfig::ReadingDisplay(ReadingConfig {
                     title: "Test Reading".into(),
                     period_ms: 10000,
                     on_period: ActionConfig::Command(CommandAction{run: "echo 'hello reading'".into()})
+                }),
+                ElementConfig::ResultDisplay(ResultDisplayConfig {
+                    title: "Test Reading".into(),
+                    result_of: 1,
                 }),
             ],
             about: AboutConfig {
@@ -52,7 +57,7 @@ mod test {
                 version: "v0.42.0".into(),
                 description: "Test description".into(),
                 url: Some("https://github.com/NGnius/kaylon".into()),
-                author: Some("NGnius <ngniusness@gmail.com>".into()),
+                authors: vec!["NGnius <ngniusness@gmail.com>".into()],
                 license: Some("MIT".into()),
             },
         };

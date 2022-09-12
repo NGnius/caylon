@@ -1,4 +1,4 @@
-import {init_usdpl, target, init_embedded, call_backend} from "usdpl-front";
+import {init_usdpl, target_usdpl, init_embedded, call_backend} from "usdpl-front";
 
 const USDPL_PORT: number = 25717;
 
@@ -20,7 +20,7 @@ export async function initBackend() {
     // init usdpl
     await init_embedded();
     init_usdpl(USDPL_PORT);
-    console.log("USDPL started for framework: " + target());
+    console.log("USDPL started for framework: " + target_usdpl());
     //setReady(true);
 }
 
@@ -29,7 +29,7 @@ export type CAbout = {
     version: string;
     description: string;
     url: string | null;
-    author: string | null;
+    authors: string[];
     license: string | null;
 }
 
@@ -58,18 +58,24 @@ export type CReading = {
     period_ms: number;
 }
 
-export type CElement = CButton | CToggle | CSlider | CReading;
+export type CResultDisplay = {
+    element: string; // "result-display"
+    title: string;
+    result_of: number;
+}
+
+export type CElement = CButton | CToggle | CSlider | CReading | CResultDisplay;
 
 export async function getElements(): Promise<CElement[]> {
-    return await call_backend("get_items", []);
+    return (await call_backend("get_items", []))[0];
 }
 
 export async function onUpdate(index: number, value: any): Promise<any> {
     return (await call_backend("on_update", [index, value]))[0];
 }
 
-export async function getReading(index: number): Promise<string | null> {
-    return (await call_backend("get_reading", [index]))[0];
+export async function getDisplay(index: number): Promise<string | null> {
+    return (await call_backend("get_display", [index]))[0];
 }
 
 export async function getAbout(): Promise<CAbout> {
@@ -77,5 +83,5 @@ export async function getAbout(): Promise<CAbout> {
 }
 
 export async function reload(): Promise<CElement[]> {
-    return await call_backend("reload", []);
+    return (await call_backend("reload", []))[0];
 }

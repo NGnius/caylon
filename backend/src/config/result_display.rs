@@ -1,0 +1,8 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ResultDisplayConfig {
+    pub title: String,
+    /// index of element who's action's result will be used
+    pub result_of: usize,
+}
