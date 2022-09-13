@@ -6,6 +6,7 @@ use usdpl_back::core::serdes::Primitive;
 use crate::config::ReadingConfig;
 use super::{Act, ActError, ActorType, RouterCommand};
 
+/// Runs an action periodically
 pub struct PeriodicActor {
     config: ReadingConfig,
     result_handler: Sender<RouterCommand>,

@@ -1,15 +1,19 @@
 [package]
-name = "kaylon" # TODO replace with plugin name (also in build.sh)
+name = "kaylon"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["NGnius <ngniusness@gmail.com>"]
+description = "Better than the Borg"
+license = "MIT"
+repository = "https://github.com/NGnius/kaylon"
 
 [dependencies]
-usdpl-back = { version = "0.7.0", features = ["decky"], path = "../../usdpl-rs/usdpl-back" }
+usdpl-back = { version = "0.7.0", features = ["decky"]}
+
+clap = { version = "3.2", features = ["derive", "std"], default-features = false }
 
 # async
-tokio = { version = "*", features = ["sync", "time"] }
+tokio = { version = "*", features = ["time"] }
 async-trait = "0.1.57"
 
 # json

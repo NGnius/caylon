@@ -1,4 +1,5 @@
 mod api;
+mod cli;
 mod config;
 mod consts;
 mod runtime;
@@ -9,16 +10,19 @@ use usdpl_back::Instance;
 use usdpl_back::core::serdes::Primitive;
 
 fn main() -> Result<(), ()> {
-    let log_filepath = format!("/tmp/{}.log", consts::PACKAGE_NAME);
+    let cli_args = cli::CliArgs::cli();
+    let log_filepath = cli_args.log.unwrap_or_else(|| format!("/tmp/{}.log", consts::PACKAGE_NAME).into());
     WriteLogger::init(
         #[cfg(debug_assertions)]{LevelFilter::Debug},
         #[cfg(not(debug_assertions))]{LevelFilter::Info},
         Default::default(),
-        std::fs::File::create(&log_filepath).unwrap()
+        std::fs::File::create(log_filepath).unwrap()
     ).unwrap();
 
-    let kaylon_conf = config::BaseConfig::load(consts::FILEPATH);
-    let (executor, sender) = runtime::RuntimeExecutor::new(kaylon_conf);
+    let filepath = cli_args.config.unwrap_or(consts::FILEPATH.into());
+
+    let kaylon_conf = config::BaseConfig::load(&filepath);
+    let (executor, sender) = runtime::RuntimeExecutor::new(kaylon_conf, filepath);
 
     log::info!("Starting back-end ({} v{})", consts::PACKAGE_NAME, consts::PACKAGE_VERSION);
     println!("Starting back-end ({} v{})", consts::PACKAGE_NAME, consts::PACKAGE_VERSION);

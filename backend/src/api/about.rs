@@ -4,6 +4,7 @@ use super::ApiParameterType;
 
 use crate::runtime::{QueueAction, QueueItem};
 
+/// API web method to retrieve AboutConfig from the back-end, as described in the config file
 pub fn get_about(sender: Sender<QueueItem>) -> impl Fn(ApiParameterType) -> ApiParameterType {
     let sender = Mutex::new(sender);
     move |_| {

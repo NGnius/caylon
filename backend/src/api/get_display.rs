@@ -3,10 +3,12 @@ use std::sync::{Mutex, mpsc::{Sender, channel, self}};
 use usdpl_back::core::serdes::Primitive;
 use usdpl_back::AsyncCallable;
 
-use super::ApiParameterType;
+use super::{ApiParameterType, ApiDisplayResult};
 
 use crate::runtime::{QueueAction, QueueItem};
 
+/// API web method to retrieve the latest display result for an element,
+// or wait for the next display result if no display result is cached
 pub struct GetDisplayEndpoint {
     //sender: tokio::sync::mpsc::Sender<SetCallbackAsync>,
     //receiver: Mutex<Option<tokio::sync::mpsc::Receiver<SetCallbackAsync>>>,
@@ -40,33 +42,31 @@ impl AsyncCallable for GetDisplayEndpoint {
                     }
                 }
             );
-            if let Ok(_) = send_result {
-                // TODO: don't poll for response
-                log::info!("waiting for display for item #{}", index);
-                let sleep_duration = std::time::Duration::from_millis(10);
-                let receiver = Mutex::new(receiver);
-                loop {
-                    let received = receiver.lock().unwrap().try_recv();
-                    match received {
+            match send_result {
+                Ok(_) => {
+                    // TODO: don't poll for response
+                    log::info!("waiting for display for item #{}", index);
+                    match super::async_utils::channel_recv(receiver).await {
                         Err(mpsc::TryRecvError::Disconnected) => {
-                            log::info!("Failed to response for get_display for #{}", index);
-                            return vec![Primitive::Empty];
+                                let msg = format!("Failed to response for get_display for #{}", index);
+                                log::warn!("{}", msg);
+                                return vec![ApiDisplayResult::failure(msg, "receiving channel disconnected").to_primitive()];
                         },
-                        Err(_) => {},
+                        Err(_) => return vec![], // impossible
                         Ok(x) => {
                             log::debug!("got display for item #{}", index);
-                            return vec![x];
+                            return vec![ApiDisplayResult::success(x).to_primitive()];
                         },
                     }
-                    tokio::time::sleep(sleep_duration).await;
+                },
+                Err(_e) => {
+                    let msg = format!("Failed to get_display for #{}", index);
+                    log::warn!("{}", msg);
+                    vec![ApiDisplayResult::failure(msg, "sending channel disconnected").to_primitive()]
                 }
-            } else {
-                log::info!("Failed to get_display for #{}", index);
-                vec![Primitive::Empty]
             }
-
         } else {
-            vec![Primitive::Empty]
+            vec![ApiDisplayResult::failure("Failed to get param 0", "invalid call parameters").to_primitive()]
         }
     }
 }

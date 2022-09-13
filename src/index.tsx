@@ -33,10 +33,26 @@ let about: backend.CAbout | null = null;
 let update = () => {};
 
 function displayCallback(index: number) {
-  return (newVal: any) => {
-    set_value(DISPLAY_KEY + index.toString(), newVal);
+  return (newVal: backend.CDisplayResponse) => {
+    if (newVal != null) {
+      switch (newVal.element) {
+        case "value":
+          let val = newVal as backend.CValueResult;
+          console.log("KAYLON: Got display for " + index.toString(), val);
+          set_value(DISPLAY_KEY + index.toString(), val.value);
+          break;
+        case "error":
+          let err = newVal as backend.CErrorResult;
+          console.warn("KAYLON: Got display error for " + index.toString(), err);
+          break;
+        default:
+          console.error("KAYLON: Got invalid display response for " + index.toString(), newVal);
+          break;
+      }
+    } else {
+      console.warn("KAYLON: Ignoring null display result for " + index.toString());
+    }
     backend.resolve(backend.getDisplay(index), displayCallback(index));
-    console.log("Got display for " + index.toString(), newVal);
     update();
   }
 }

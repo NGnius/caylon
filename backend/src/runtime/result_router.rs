@@ -20,9 +20,13 @@ pub enum RouterCommand {
 }
 
 pub struct ResultRouter {
+    /// receiver for new router commands to perform
     comm: Receiver<RouterCommand>,
+    /// active callbacks; more than one sender may listen for a result
     senders: Vec<[Option<Sender<Primitive>>; MAX_HANDLERS_PER_ITEM]>,
+    /// cache of sender, for Act paradigm
     comm_tx: Option<Sender<RouterCommand>>,
+    /// cache of unheard results
     cache: Vec<Option<Primitive>>,
 }
 
@@ -62,16 +66,21 @@ impl Act for ResultRouter {
             for command in self.comm.iter() {
                 match command {
                     RouterCommand::AddSender { index, sender } => {
+                        // register result listener
                         log::debug!("Handling AddSender for item #{}", index);
                         if let Some(senders) = self.senders.get_mut(index) {
-                            // send cached value, if available
+                            // send cached value, if available.
+                            // This avoids race conditions from a result being received before
+                            // a listener has been registered. This is especially an issue during
+                            // program start, when actions run immediately and listeners come from
+                            // the slow front-end (web request in the browser)
                             if self.cache[index].is_some() {
                                 log::debug!("Routing cached result for item #{}", index);
                                 let result = self.cache[index].take().unwrap();
                                 match sender.send(result) {
                                     Ok(_) => {},
                                     Err(e) => {
-                                        self.cache[index] = Some(e.0);
+                                        self.cache[index] = Some(e.0); // re-cache if send fails
                                         log::debug!("ResultRouter ignoring AddSender since sending cached value failed");
                                         continue;
                                     },
@@ -94,9 +103,11 @@ impl Act for ResultRouter {
                         }
                     }
                     RouterCommand::HandleResult {index, result} => {
+                        // send a result to all (relevant) listeners
                         log::debug!("Handling HandleResult for item #{}", index);
                         if let Some(senders) = self.senders.get_mut(index) {
                             if Self::all_senders_none(senders) {
+                                // cache result if it won't be heard
                                 self.cache[index] = Some(result);
                                 log::debug!("Cached result for item #{}", index);
                             } else {

@@ -1,9 +1,9 @@
 {
   "name": "Kaylon",
   "author": "NGnius",
-  "flags": ["debug", "_root"],
+  "flags": ["_debug", "_root"],
   "publish": {
-    "tags": ["template", "root"],
+    "tags": ["automation", "cli"],
     "description": "Better than the Borg",
     "image": ""
   }

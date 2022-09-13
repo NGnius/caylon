@@ -2,46 +2,61 @@
   "api-version": "v0.0.0",
   "items": [
     {
+      "element": "result-display",
+      "title": "Best Kaylon",
+      "result_of": 1
+    },
+    {
       "element": "button",
-      "title": "Test Button",
+      "title": "Tell Me!",
       "on_click": {
         "action": "command",
-        "run": "echo 'hello button'"
-      }
-    },
-    {
-      "element": "toggle",
-      "title": "Test Toggle",
-      "description": "Toggle description",
-      "on_toggle": {
-        "action": "command",
-        "run": "echo 'hello toggle ${KAYLON_VALUE}'"
-      }
-    },
-    {
-      "element": "slider",
-      "title": "Test Slider",
-      "min": 0,
-      "max": 3,
-      "notches": null,
-      "on_set": {
-        "action": "command",
-        "run": "echo 'hello slider'"
-      }
-    },
-    {
-      "element": "reading",
-      "title": "Test Reading",
-      "period_ms": 10000,
-      "on_period": {
-        "action": "command",
-        "run": "echo 'hello reading'"
+        "run": "echo ISAAC"
       }
     },
     {
       "element": "result-display",
-      "title": "Test Result",
+      "title": "Smartest Kaylon",
       "result_of": 1
+    },
+    {
+      "element": "toggle",
+      "title": "Switch",
+      "description": "Toggle me!",
+      "on_toggle": {
+        "action": "command",
+        "run": "echo \"Toggle is now ${KAYLON_VALUE}\""
+      }
+    },
+    {
+      "element": "result-display",
+      "title": "",
+      "result_of": 3
+    },
+    {
+      "element": "slider",
+      "title": "Slider",
+      "min": 0,
+      "max": 10,
+      "notches": null,
+      "on_set": {
+        "action": "command",
+        "run": "echo \"Slider is now ${KAYLON_VALUE}\""
+      }
+    },
+    {
+      "element": "result-display",
+      "title": "",
+      "result_of": 5
+    },
+    {
+      "element": "reading",
+      "title": "Fan Speed",
+      "period_ms": 1000,
+      "on_period": {
+        "action": "command",
+        "run": "cat /sys/class/hwmon/hwmon5/fan1_input"
+      }
     }
   ],
   "about": {

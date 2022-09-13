@@ -4,6 +4,7 @@ use usdpl_back::core::serdes::Primitive;
 
 use crate::config::{AboutConfig, ElementConfig};
 
+/// An API operation for the executor to perform
 pub enum QueueAction {
     GetAbout {
         respond_to: Sender<AboutConfig>,
@@ -21,6 +22,7 @@ pub enum QueueAction {
     }
 }
 
+/// Wrapper for an executor command
 pub struct QueueItem {
     pub action: QueueAction,
 }

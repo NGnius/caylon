@@ -4,6 +4,7 @@ use crate::config::{ElementConfig, ActionConfig};
 
 pub type ActError = String;
 
+/// Something capable of performing an action.
 pub trait Act: Sized {
     type Param;
     type Config: ?Sized;
@@ -12,6 +13,7 @@ pub trait Act: Sized {
     fn run(self) -> Self::Return;
 }
 
+/// Action performer for a regular element
 pub struct Actor {
     actor_type: ActorType,
     index: usize,

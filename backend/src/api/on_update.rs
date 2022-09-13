@@ -6,6 +6,7 @@ use super::ApiParameterType;
 
 use crate::runtime::{QueueAction, QueueItem};
 
+/// API web method to notify the back-end of an update event (e.g. click, slider slide, toggle)
 pub fn on_update(sender: Sender<QueueItem>) -> impl Fn(ApiParameterType) -> ApiParameterType {
     let sender = Mutex::new(sender);
     move |mut params: ApiParameterType| {

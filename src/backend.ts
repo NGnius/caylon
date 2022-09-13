@@ -66,6 +66,19 @@ export type CResultDisplay = {
 
 export type CElement = CButton | CToggle | CSlider | CReading | CResultDisplay;
 
+export type CErrorResult = {
+    element: string; // "error"
+    message: string;
+    exception: string;
+}
+
+export type CValueResult = {
+    element: string; // "value"
+    value: any;
+}
+
+export type CDisplayResponse = CValueResult | CErrorResult;
+
 export async function getElements(): Promise<CElement[]> {
     return (await call_backend("get_items", []))[0];
 }
@@ -74,7 +87,7 @@ export async function onUpdate(index: number, value: any): Promise<any> {
     return (await call_backend("on_update", [index, value]))[0];
 }
 
-export async function getDisplay(index: number): Promise<string | null> {
+export async function getDisplay(index: number): Promise<CDisplayResponse> {
     return (await call_backend("get_display", [index]))[0];
 }
 

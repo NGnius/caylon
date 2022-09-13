@@ -7,6 +7,7 @@ use super::{Act, ActError};
 
 const VALUE_ENV_VAR: &str = "KAYLON_VALUE";
 
+/// Runs a CLI command in Bash
 pub struct CommandActor {
     shell: String,
     run: String,
