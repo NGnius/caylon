@@ -21,12 +21,18 @@ impl BaseConfig {
                 let reader = std::io::BufReader::new(file);
                 match serde_json::from_reader(reader) {
                     Ok(conf) => return conf,
-                    Err(e) => log::error!("Failed to deserialize {}: {}", path.display(), e),
+                    Err(e) => {
+                        log::error!("Failed to deserialize {}: {}", path.display(), e);
+                        panic!("Failed to deserialize {}: {}", path.display(), e)
+                    },
                 }
             },
-            Err(e) => log::error!("Failed to open {}: {}", path.display(), e),
+            Err(e) => {
+                log::error!("Failed to open {}: {}", path.display(), e);
+                panic!("Failed to open {}: {}", path.display(), e);
+            }
         }
-        panic!("Cannot open {}", path.display())
+        //panic!("Cannot open {}", path.display())
     }
 
     #[inline]

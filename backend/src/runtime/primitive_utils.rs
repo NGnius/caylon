@@ -51,7 +51,7 @@ pub fn debug(primitive: &Primitive) -> String {
     }
 }
 
-/*#[inline]
+#[inline]
 pub fn display(primitive: Primitive) -> String {
     match primitive {
         Primitive::Empty => "".to_owned(),
@@ -65,7 +65,7 @@ pub fn display(primitive: Primitive) -> String {
         Primitive::Bool(x) => x.to_string(),
         Primitive::Json(x) => x,
     }
-}*/
+}
 
 #[inline]
 pub fn clone(primitive: &Primitive) -> Primitive {

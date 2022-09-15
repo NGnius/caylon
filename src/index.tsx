@@ -32,10 +32,12 @@ let about: backend.CAbout | null = null;
 
 let update = () => {};
 
+let updateTasks: (() => void)[] = [];
+
 function displayCallback(index: number) {
   return (newVal: backend.CDisplayResponse) => {
     if (newVal != null) {
-      switch (newVal.element) {
+      switch (newVal.result) {
         case "value":
           let val = newVal as backend.CValueResult;
           console.log("KAYLON: Got display for " + index.toString(), val);
@@ -52,8 +54,15 @@ function displayCallback(index: number) {
     } else {
       console.warn("KAYLON: Ignoring null display result for " + index.toString());
     }
-    backend.resolve(backend.getDisplay(index), displayCallback(index));
+    updateTasks.push(() => backend.resolve(backend.getDisplay(index), displayCallback(index)));
     update();
+  }
+}
+
+function onGetElements() {
+  for (let i = 0; i < items.length; i++) {
+    console.log("KAYLON: req display for item #" + i.toString());
+    backend.resolve(backend.getDisplay(i), displayCallback(i));
   }
 }
 
@@ -68,11 +77,8 @@ function displayCallback(index: number) {
   let result = await elements_promise;
   console.log("KAYLON: got elements", result);
   if (result != null) {
-    items = await backend.getElements();
-    for (let i = 0; i < items.length; i++) {
-      console.log("KAYLON: req display for item #" + i.toString());
-      backend.resolve(backend.getDisplay(i), displayCallback(i));
-    }
+    items = result;
+    onGetElements();
   } else {
     console.warn("KAYLON: backend connection failed");
   }
@@ -88,6 +94,13 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
 
   function updateIdc(_: any) {
     update();
+  }
+
+  // perform tasks (like updating display elements) only while rendering the plugin
+  let taskItem = updateTasks.pop();
+  while (taskItem != undefined) {
+    taskItem();
+    taskItem = updateTasks.pop();
   }
 
   return (
@@ -106,6 +119,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
               (reload_items: backend.CElement[]) => {
                 items = reload_items;
                 console.log("KAYLON: got elements", reload_items);
+                if (reload_items != null) {
+                  items = reload_items;
+                  onGetElements();
+                } else {
+                  console.warn("KAYLON: backend connection failed");
+                }
                 update();
               });
             backend.resolve(backend.getAbout(),

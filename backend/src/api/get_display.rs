@@ -1,4 +1,4 @@
-use std::sync::{Mutex, mpsc::{Sender, channel, self}};
+use std::sync::{Mutex, mpsc::{Sender, channel}};
 
 use usdpl_back::core::serdes::Primitive;
 use usdpl_back::AsyncCallable;
@@ -44,15 +44,14 @@ impl AsyncCallable for GetDisplayEndpoint {
             );
             match send_result {
                 Ok(_) => {
-                    // TODO: don't poll for response
                     log::info!("waiting for display for item #{}", index);
                     match super::async_utils::channel_recv(receiver).await {
-                        Err(mpsc::TryRecvError::Disconnected) => {
+                        Err(_) => {
                                 let msg = format!("Failed to response for get_display for #{}", index);
                                 log::warn!("{}", msg);
                                 return vec![ApiDisplayResult::failure(msg, "receiving channel disconnected").to_primitive()];
                         },
-                        Err(_) => return vec![], // impossible
+                        //Err(_) => return vec![], // impossible
                         Ok(x) => {
                             log::debug!("got display for item #{}", index);
                             return vec![ApiDisplayResult::success(x).to_primitive()];

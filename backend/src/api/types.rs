@@ -3,7 +3,7 @@ use serde_json::Value;
 use usdpl_back::core::serdes::Primitive;
 
 #[derive(Serialize, Deserialize, Clone)]
-#[serde(tag = "element")]
+#[serde(tag = "result")]
 pub enum ApiDisplayResult {
     #[serde(rename = "value")]
     Value(ApiValue),

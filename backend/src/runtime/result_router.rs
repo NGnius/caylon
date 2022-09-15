@@ -40,12 +40,12 @@ impl ResultRouter {
     }
 }
 
-impl Act for ResultRouter {
+impl<'a> Act<'a> for ResultRouter {
     type Param = usize;
     type Config = ();
     type Return = Sender<RouterCommand>;
 
-    fn build(_config: &Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
+    fn build(_config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
         let (tx, rx) = mpsc::channel();
         let mut cache_vec = Vec::with_capacity(parameter);
         for _ in 0..parameter {

@@ -5,8 +5,6 @@ use usdpl_back::core::serdes::Primitive;
 use crate::config::CommandAction;
 use super::{Act, ActError};
 
-const VALUE_ENV_VAR: &str = "KAYLON_VALUE";
-
 /// Runs a CLI command in Bash
 pub struct CommandActor {
     shell: String,
@@ -31,12 +29,12 @@ impl CommandActor {
     }
 }
 
-impl Act for CommandActor {
+impl<'a> Act<'a> for CommandActor {
     type Param = Primitive;
     type Config = CommandAction;
     type Return = String;
 
-    fn build(config: &CommandAction, parameter: Primitive) -> Result<Self, ActError> {
+    fn build(config: &'a CommandAction, parameter: Primitive) -> Result<Self, ActError> {
         Ok(
             Self {
                 shell: "bash".to_owned(),
@@ -49,14 +47,14 @@ impl Act for CommandActor {
     fn run(self) -> Self::Return {
         let output = Command::new(&self.shell)
             .args(["-c", &self.run])
-            .env(VALUE_ENV_VAR, &self.variable)
+            .env(super::VALUE_VAR, &self.variable)
             .output()
             .expect(&format!("Cannot run `{}`", &self.run));
         if !output.stderr.is_empty() {
             log::error!("Error running `{}`: {}", &self.run, String::from_utf8(output.stderr).unwrap_or_else(|_| "<non utf-8 stderr output>".to_owned()))
         }
         let result = String::from_utf8(output.stdout).expect(&format!("Cannot parse stdout from `{}` as UTF-8", self.run));
-        log::debug!("CommandActor ran `{}` (${}=\"{}\") -> `{}`", &self.run, VALUE_ENV_VAR, &self.variable, &result);
+        log::debug!("CommandActor ran `{}` (${}=\"{}\") -> `{}`", &self.run, super::VALUE_VAR, &self.variable, &result);
         result
     }
 }

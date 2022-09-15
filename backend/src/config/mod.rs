@@ -7,9 +7,10 @@ mod reading;
 mod result_display;
 mod slider;
 mod toggle;
+mod transformer;
 
 pub use about::AboutConfig;
-pub use action::{ActionConfig, CommandAction};
+pub use action::{ActionConfig, CommandAction, MirrorAction};
 pub use base::BaseConfig;
 pub use button::ButtonConfig;
 pub use element::ElementConfig;
@@ -17,6 +18,7 @@ pub use reading::ReadingConfig;
 pub use result_display::ResultDisplayConfig;
 pub use slider::SliderConfig;
 pub use toggle::ToggleConfig;
+pub use transformer::{TransformAction, TransformTypeAction, ReplaceTransformAction, ExpandTransformAction, LogTransformAction, LogLevel, PatternConfig};
 
 #[cfg(test)]
 mod test {

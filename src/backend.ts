@@ -67,13 +67,13 @@ export type CResultDisplay = {
 export type CElement = CButton | CToggle | CSlider | CReading | CResultDisplay;
 
 export type CErrorResult = {
-    element: string; // "error"
+    result: string; // "error"
     message: string;
     exception: string;
 }
 
 export type CValueResult = {
-    element: string; // "value"
+    result: string; // "value"
     value: any;
 }
 

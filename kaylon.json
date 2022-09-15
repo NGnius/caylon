@@ -30,7 +30,7 @@
     },
     {
       "element": "result-display",
-      "title": "",
+      "title": " ",
       "result_of": 3
     },
     {
@@ -46,7 +46,7 @@
     },
     {
       "element": "result-display",
-      "title": "",
+      "title": " ",
       "result_of": 5
     },
     {
@@ -54,8 +54,41 @@
       "title": "Fan Speed",
       "period_ms": 1000,
       "on_period": {
-        "action": "command",
-        "run": "cat /sys/class/hwmon/hwmon5/fan1_input"
+        "action": "transform",
+        "target": {
+          "action": "command",
+          "run": "cat /sys/class/hwmon/hwmon5/fan1_input"
+        },
+        "transformer": {
+          "rule": "post-expand",
+          "format": "$KAYLON_VALUE RPM"
+        }
+      }
+    },
+    {
+      "element": "toggle",
+      "title": "Lighthouses",
+      "description": "Turn Valve Index Lighthouses on",
+      "on_toggle": {
+        "action": "transform",
+        "target": {
+          "action": "transform",
+          "target": {
+            "action": "command",
+            "run": "python3 ./bin/lighthouse_ctrl.py ${KAYLON_VALUE}"
+          },
+          "transformer": {
+            "rule": "post-replace",
+            "patterns": [{"pattern": ".*", "format": "Done", "s": true}]
+          }
+        },
+        "transformer": {
+          "rule": "pre-replace",
+          "patterns": [
+            {"pattern": "TRUE", "format": "on", "i": true},
+            {"pattern": "FALSE", "format": "off", "i": true}
+          ]
+        }
       }
     }
   ],

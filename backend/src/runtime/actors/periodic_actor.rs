@@ -4,7 +4,8 @@ use std::time::Duration;
 use usdpl_back::core::serdes::Primitive;
 
 use crate::config::ReadingConfig;
-use super::{Act, ActError, ActorType, RouterCommand};
+use super::{Act, ActError, ActorType};
+use crate::runtime::RouterCommand;
 
 /// Runs an action periodically
 pub struct PeriodicActor {
@@ -13,12 +14,12 @@ pub struct PeriodicActor {
     index: usize,
 }
 
-impl Act for PeriodicActor {
+impl<'a> Act<'a> for PeriodicActor {
     type Param = (usize, Sender<RouterCommand>);
     type Config = ReadingConfig;
     type Return = ();
 
-    fn build(config: &Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
+    fn build(config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
         ActorType::build(&config.on_period, Primitive::Empty)?;
         Ok(
             Self {
