@@ -2,25 +2,18 @@
 
 use serde::{Serialize, Deserialize};
 
-use super::ActionConfig;
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TransformAction {
-    pub target: Box<ActionConfig>,
     pub transformer: TransformTypeAction,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(tag = "rule")]
 pub enum TransformTypeAction {
-    #[serde(rename = "pre-replace")]
-    PreReplace(ReplaceTransformAction),
-    #[serde(rename = "post-replace")]
-    PostReplace(ReplaceTransformAction),
-    #[serde(rename = "pre-expand")]
-    PreExpand(ExpandTransformAction),
-    #[serde(rename = "post-expand")]
-    PostExpand(ExpandTransformAction),
+    #[serde(rename = "replace")]
+    Replace(ReplaceTransformAction),
+    #[serde(rename = "expand")]
+    Expand(ExpandTransformAction),
     #[serde(rename = "log")]
     Log(LogTransformAction),
 }

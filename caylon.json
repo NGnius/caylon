@@ -1,0 +1,131 @@
+{
+  "api-version": "v0.0.0",
+  "items": [
+    {
+      "element": "result-display",
+      "title": "Best Kaylon",
+      "result_of": 1
+    },
+    {
+      "element": "button",
+      "title": "Tell Me!",
+      "on_click": {
+        "action": "command",
+        "run": "echo ISAAC"
+      }
+    },
+    {
+      "element": "result-display",
+      "title": "Smartest Kaylon",
+      "result_of": 1
+    },
+    {
+      "element": "toggle",
+      "title": "Switch",
+      "description": "Toggle me!",
+      "on_toggle": {
+        "action": "command",
+        "run": "echo \"Toggle is now ${CAYLON_VALUE}\""
+      }
+    },
+    {
+      "element": "result-display",
+      "title": " ",
+      "result_of": 3
+    },
+    {
+      "element": "slider",
+      "title": "Slider",
+      "min": 0,
+      "max": 10,
+      "notches": null,
+      "on_set": {
+        "action": "command",
+        "run": "echo \"Slider is now ${CAYLON_VALUE}\""
+      }
+    },
+    {
+      "element": "result-display",
+      "title": " ",
+      "result_of": 5
+    },
+    {
+      "element": "reading",
+      "title": "Fan Speed",
+      "period_ms": null,
+      "on_period": {
+        "action": "sequence",
+        "steps": [
+          {
+            "action": "command",
+            "run": "cat /sys/class/hwmon/hwmon5/fan1_input"
+          },
+          {
+            "action": "transform",
+            "transformer": {
+              "rule": "expand",
+              "format": "$CAYLON_VALUE RPM"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "element": "toggle",
+      "title": "Lighthouses",
+      "description": "Turn Valve Index Lighthouses on",
+      "on_toggle": {
+        "action": "sequence",
+        "steps": [
+          {
+            "action": "transform",
+            "transformer": {
+              "rule": "replace",
+              "patterns": [
+                {"pattern": "TRUE", "format": "on", "i": true},
+                {"pattern": "FALSE", "format": "off", "i": true}
+              ]
+            }
+          },
+          {
+            "action": "command",
+            "run": "python3 ./bin/lighthouse_ctrl.py ${CAYLON_VALUE}"
+          },
+          {
+            "action": "transform",
+            "transformer": {
+              "rule": "replace",
+              "patterns": [{"pattern": ".*", "format": "Done", "s": true}]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "element": "slider",
+      "title": "JS Test",
+      "min": 0,
+      "max": 10,
+      "notches": null,
+      "on_set": {
+        "action": "javascript",
+        "run": "console.warn(\"YAAAAAAAAAAAAAAAAAAAAAAAAAAAARG JS Slider is now\", CAYLON_VALUE); \"JS Result\""
+      }
+    },
+    {
+      "element": "result-display",
+      "title": "JS Test says",
+      "result_of": 9
+    }
+  ],
+  "about": {
+    "name": "Test name",
+    "version": "v0.42.0",
+    "description": "Test description",
+    "url": "https://github.com/NGnius/kaylon",
+    "authors": [
+      "NGnius <ngniusness@gmail.com>"
+    ],
+    "license": "MIT"
+  }
+}

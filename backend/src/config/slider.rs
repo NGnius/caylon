@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use super::ActionConfig;
+use super::TopLevelActionConfig;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SliderConfig {
@@ -8,5 +8,5 @@ pub struct SliderConfig {
     pub min: u64,
     pub max: u64,
     pub notches: Option<Vec<String>>,
-    pub on_set: ActionConfig,
+    pub on_set: TopLevelActionConfig,
 }

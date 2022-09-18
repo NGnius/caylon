@@ -12,18 +12,22 @@ pub enum ApiDisplayResult {
 }
 
 impl ApiDisplayResult {
+    #[inline]
     pub fn dump(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
+    #[inline]
     pub fn to_primitive(self) -> Primitive {
         Primitive::Json(self.dump())
     }
 
+    #[inline]
     pub fn success(primitive: Primitive) -> Self {
         Self::Value(ApiValue::new(primitive))
     }
 
+    #[inline]
     pub fn failure<S: Into<String>, D: core::fmt::Display>(msg: S, err: D) -> Self {
         Self::Error(ApiError::new(msg, err))
     }
@@ -66,5 +70,42 @@ impl ApiError {
             message: msg.into(),
             exception: err.to_string(),
         }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(tag = "result")]
+pub enum ApiJavascriptResult {
+    #[serde(rename = "javascript")]
+    Javascript(ApiJavascript),
+    #[serde(rename = "error")]
+    Error(ApiError),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ApiJavascript {
+    pub id: usize,
+    pub raw: String,
+}
+
+impl ApiJavascriptResult {
+    #[inline]
+    pub fn dump(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    #[inline]
+    pub fn to_primitive(self) -> Primitive {
+        Primitive::Json(self.dump())
+    }
+
+    #[inline]
+    pub fn success(data: super::JavascriptData) -> Self {
+        Self::Javascript(ApiJavascript{ raw: data.raw, id: data.id })
+    }
+
+    #[inline]
+    pub fn failure<S: Into<String>, D: core::fmt::Display>(msg: S, err: D) -> Self {
+        Self::Error(ApiError::new(msg, err))
     }
 }

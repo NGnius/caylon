@@ -3,132 +3,37 @@ use usdpl_back::core::serdes::Primitive;
 
 use crate::runtime::primitive_utils;
 
-use crate::config::{TransformAction, ActionConfig, TransformTypeAction, ReplaceTransformAction, ExpandTransformAction, LogTransformAction, LogLevel, PatternConfig};
-use super::{Act, ActError, ActorType};
+use crate::config::{TransformAction, TransformTypeAction, ReplaceTransformAction, ExpandTransformAction, LogTransformAction, LogLevel, PatternConfig};
+use super::{SeqAct, ActError};
 
 /// Changes the output or input of an act
 pub enum TransformActor {
-    PreReplace(PreReplaceTransformActor),
-    PostReplace(PostReplaceTransformActor),
-    PreExpand(PreExpandTransformActor),
-    PostExpand(PostExpandTransformActor),
+    Replace(ReplaceTransformActor),
+    Expand(ExpandTransformActor),
     Log(LogTransformActor),
 }
 
-impl<'a> Act<'a> for TransformActor {
-    type Param = Primitive;
+impl<'a> SeqAct<'a> for TransformActor {
+    type BuildParam = ();
     type Config = TransformAction;
-    type Return = Primitive;
 
-    fn build(config: &'a TransformAction, parameter: Primitive) -> Result<Self, ActError> {
+    fn build(config: &'a TransformAction, idc: ()) -> Result<Self, ActError> {
         let result = Ok(match &config.transformer {
-            TransformTypeAction::PreReplace(x) =>
-                Self::PreReplace(PreReplaceTransformActor::build(&(x, &config.target), parameter)?),
-            TransformTypeAction::PostReplace(x) =>
-                Self::PostReplace(PostReplaceTransformActor::build(&(x, &config.target), parameter)?),
-            TransformTypeAction::PreExpand(x) =>
-                Self::PreExpand(PreExpandTransformActor::build(&(x, &config.target), parameter)?),
-            TransformTypeAction::PostExpand(x) =>
-                Self::PostExpand(PostExpandTransformActor::build(&(x, &config.target), parameter)?),
+            TransformTypeAction::Replace(x) =>
+                Self::Replace(ReplaceTransformActor::build(x, idc)?),
+            TransformTypeAction::Expand(x) =>
+                Self::Expand(ExpandTransformActor::build(x, idc)?),
             TransformTypeAction::Log(x) =>
-                Self::Log(LogTransformActor::build(&(x, &config.target), parameter)?),
+                Self::Log(LogTransformActor::build(x, idc)?),
         });
         result
     }
 
-    fn run(self) -> Self::Return {
+    fn run(self, parameter: Primitive) -> Primitive {
         match self {
-            Self::PreReplace(x) => x.run(),
-            Self::PostReplace(x) => x.run(),
-            Self::PreExpand(x) => x.run(),
-            Self::PostExpand(x) => x.run(),
-            Self::Log(x) => x.run()
-        }
-    }
-}
-
-pub(super) struct TransformPostActor {
-    op_fn: Box<dyn (FnOnce(Primitive) -> Primitive) + Send>,
-    actor: Box<ActorType>,
-}
-
-impl<'a> Act<'a> for TransformPostActor {
-    type Param = (Primitive, Box<dyn (FnOnce(Primitive) -> Primitive) + Send>);
-    type Config = ActionConfig;
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
-        Ok(
-            Self {
-                op_fn: parameter.1,
-                actor: Box::new(ActorType::build(config, parameter.0)?),
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        (self.op_fn)(self.actor.run())
-    }
-}
-
-/// executes op_fn and ActionConfig::build in Actor::build()
-/// this blocks the main execution thread,
-/// but an Err() from ActionConfig::build will be be propogated correctly
-pub(super) struct TransformEagerPreActor {
-    actor: Box<ActorType>,
-}
-
-impl<'a> Act<'a> for TransformEagerPreActor {
-    type Param = (Primitive, Box<dyn (FnOnce(Primitive) -> Primitive) + Send>);
-    type Config = ActionConfig;
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
-        let primitive = (parameter.1)(parameter.0);
-        Ok(
-            Self {
-                actor: Box::new(ActorType::build(config, primitive)?),
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        self.actor.run()
-    }
-}
-
-/// executes op_fn and ActionConfig::build in Actor.run()
-/// this doesn't block the main execution thread,
-/// but an Err() from ActionConfig::build will produce an empty result
-pub(super) struct TransformLazyPreActor {
-    op_fn: Box<dyn (FnOnce(Primitive) -> Primitive) + Send>,
-    action: ActionConfig,
-    primitive: Primitive,
-}
-
-impl<'a> Act<'a> for TransformLazyPreActor {
-    type Param = (Primitive, Box<dyn (FnOnce(Primitive) -> Primitive) + Send>);
-    type Config = ActionConfig;
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
-        Ok(
-            Self {
-                op_fn: parameter.1,
-                action: config.to_owned(),
-                primitive: parameter.0,
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        let primitive = (self.op_fn)(self.primitive);
-        match ActorType::build(&self.action, primitive) {
-            Ok(action) => action.run(),
-            Err(e) => {
-                log::error!("Failed to lazily build action for pre-transformer: {}", e);
-                Primitive::Empty
-            }
+            Self::Replace(x) => x.run(parameter),
+            Self::Expand(x) => x.run(parameter),
+            Self::Log(x) => x.run(parameter)
         }
     }
 }
@@ -156,165 +61,84 @@ impl PatternRule {
     }
 }
 
-fn replace_fn(config: &ReplaceTransformAction) -> Result<impl FnOnce(Primitive) -> Primitive, ActError> {
-    let mut patterns: Vec<PatternRule> = Vec::with_capacity(config.patterns.len());
-    for pattern in config.patterns.iter() {
-        patterns.push(PatternRule::from_config(pattern)?);
+pub struct ReplaceTransformActor {
+    patterns: Vec<PatternRule>,
+}
+
+impl<'a> SeqAct<'a> for ReplaceTransformActor {
+    type BuildParam = ();
+    type Config = ReplaceTransformAction;
+
+    fn build(config: &'a Self::Config, _: ()) -> Result<Self, ActError> {
+        let mut patterns_vec: Vec<PatternRule> = Vec::with_capacity(config.patterns.len());
+        for pattern in config.patterns.iter() {
+            patterns_vec.push(PatternRule::from_config(pattern)?);
+        }
+        Ok(
+            Self {
+                patterns: patterns_vec,
+            }
+        )
     }
 
-    Ok(move |p| {
+    fn run(self, p: Primitive) -> Primitive {
         let mut stringy = primitive_utils::display(p);
-        for pattern in patterns {
+        for pattern in self.patterns {
             stringy = pattern.pattern.replace(&stringy, pattern.format).into_owned();
         }
         stringy.into()
-    })
+    }
 }
 
-pub struct PreReplaceTransformActor {
-    transformer: TransformEagerPreActor,
+pub struct ExpandTransformActor {
+    format: String,
 }
 
-impl<'a> Act<'a> for PreReplaceTransformActor {
-    type Param = Primitive;
-    type Config = (&'a ReplaceTransformAction, &'a ActionConfig);
-    type Return = Primitive;
 
-    fn build(config: &'a Self::Config, parameter: Primitive) -> Result<Self, ActError> {
+impl<'a> SeqAct<'a> for ExpandTransformActor {
+    type BuildParam = ();
+    type Config = ExpandTransformAction;
+
+    fn build(config: &'a Self::Config, _: ()) -> Result<Self, ActError> {
         Ok(
             Self {
-                transformer: TransformEagerPreActor::build(
-                    config.1,
-                    (parameter,
-                    Box::new(replace_fn(config.0)?)
-                    ))?,
+                format: config.format.clone(),
             }
         )
     }
 
-    fn run(self) -> Self::Return {
-        self.transformer.run()
-    }
-}
-
-pub struct PostReplaceTransformActor {
-    transformer: TransformPostActor,
-}
-
-impl<'a> Act<'a> for PostReplaceTransformActor {
-    type Param = Primitive;
-    type Config = (&'a ReplaceTransformAction, &'a ActionConfig);
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Primitive) -> Result<Self, ActError> {
-
-        Ok(
-            Self {
-                transformer: TransformPostActor::build(
-                    config.1,
-                    (parameter,
-                    Box::new(replace_fn(config.0)?)
-                    ))?,
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        self.transformer.run()
-    }
-}
-
-fn expand_fn(config: &ExpandTransformAction) -> Result<impl FnOnce(Primitive) -> Primitive, ActError> {
-    let format = config.format.clone();
-    Ok(move |p| {
+    fn run(self, p: Primitive) -> Primitive {
         let stringy = primitive_utils::display(p);
         let pattern1 = format!("${}", super::VALUE_VAR);
         let pattern2 = format!("${{{}}}", super::VALUE_VAR);
-        format.replace(&pattern1, &pattern2).replace(&pattern2, &stringy).into()
-    })
-}
-
-pub struct PreExpandTransformActor {
-    transformer: TransformLazyPreActor,
-}
-
-
-impl<'a> Act<'a> for PreExpandTransformActor {
-    type Param = Primitive;
-    type Config = (&'a ExpandTransformAction, &'a ActionConfig);
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Primitive) -> Result<Self, ActError> {
-        Ok(
-            Self {
-                transformer: TransformLazyPreActor::build(
-                    config.1,
-                    (parameter,
-                    Box::new(expand_fn(config.0)?)
-                    ))?,
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        self.transformer.run()
-    }
-}
-
-pub struct PostExpandTransformActor {
-    transformer: TransformPostActor,
-}
-
-
-impl<'a> Act<'a> for PostExpandTransformActor {
-    type Param = Primitive;
-    type Config = (&'a ExpandTransformAction, &'a ActionConfig);
-    type Return = Primitive;
-
-    fn build(config: &'a Self::Config, parameter: Primitive) -> Result<Self, ActError> {
-        Ok(
-            Self {
-                transformer: TransformPostActor::build(
-                    config.1,
-                    (parameter,
-                    Box::new(expand_fn(config.0)?)
-                    ))?,
-            }
-        )
-    }
-
-    fn run(self) -> Self::Return {
-        self.transformer.run()
+        self.format.replace(&pattern1, &pattern2).replace(&pattern2, &stringy).into()
     }
 }
 
 pub struct LogTransformActor {
-    generic: TransformPostActor,
+    log_level: LogLevel,
 }
 
-impl<'a> Act<'a> for LogTransformActor {
-    type Param = Primitive;
-    type Config = (&'a LogTransformAction, &'a ActionConfig);
-    type Return = Primitive;
+impl<'a> SeqAct<'a> for LogTransformActor {
+    type BuildParam = ();
+    type Config = LogTransformAction;
 
-    fn build(config: &'a Self::Config, parameter: Primitive) -> Result<Self, ActError> {
+    fn build(config: &'a Self::Config, _: ()) -> Result<Self, ActError> {
         Ok(
             Self {
-                generic: TransformPostActor::build(
-                    config.1,
-                    (parameter,
-                        match config.0.level {
-                            LogLevel::DEBUG => Box::new(|p| {log::debug!("{}", primitive_utils::debug(&p));p}),
-                            LogLevel::INFO => Box::new(|p| {log::info!("{}", primitive_utils::debug(&p));p}),
-                            LogLevel::WARN => Box::new(|p| {log::warn!("{}", primitive_utils::debug(&p));p}),
-                            LogLevel::ERROR => Box::new(|p| {log::error!("{}", primitive_utils::debug(&p));p}),
-                        }
-                    ))?,
+                log_level: config.level.clone()
             }
         )
     }
 
-    fn run(self) -> Self::Return {
-        self.generic.run()
+    fn run(self, p: Primitive) -> Primitive {
+        let stringy = primitive_utils::debug(&p);
+        match self.log_level {
+            LogLevel::DEBUG => log::debug!("{}", stringy),
+            LogLevel::INFO => log::info!("{}", stringy),
+            LogLevel::WARN => log::warn!("{}", stringy),
+            LogLevel::ERROR => log::error!("{}", stringy),
+        }
+        p
     }
 }

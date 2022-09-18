@@ -31,13 +31,13 @@ pub struct ResultRouter {
 }
 
 impl ResultRouter {
-    fn all_senders_none(senders: &[Option<Sender<Primitive>>]) -> bool {
+    /*fn all_senders_none(senders: &[Option<Sender<Primitive>>]) -> bool {
         let mut all_none = true;
         for s in senders.iter() {
             all_none &= s.is_none();
         }
         all_none
-    }
+    }*/
 }
 
 impl<'a> Act<'a> for ResultRouter {
@@ -53,7 +53,7 @@ impl<'a> Act<'a> for ResultRouter {
         }
         Ok(Self {
             comm: rx,
-            senders: vec![[(); MAX_HANDLERS_PER_ITEM].map(|_| None); parameter],
+            senders: vec![[(); MAX_HANDLERS_PER_ITEM].map(|_| None); parameter], // parameter x MAX_HANDLERS matrix
             comm_tx: Some(tx),
             cache: cache_vec,
         })
@@ -106,22 +106,23 @@ impl<'a> Act<'a> for ResultRouter {
                         // send a result to all (relevant) listeners
                         log::debug!("Handling HandleResult for item #{}", index);
                         if let Some(senders) = self.senders.get_mut(index) {
-                            if Self::all_senders_none(senders) {
+                            let mut any_success = false;
+                            for (i, sender_opt) in senders.iter_mut().enumerate() {
+                                if let Some(sender) = sender_opt {
+                                    match sender.send(super::primitive_utils::clone(&result)) {
+                                        Ok(_) => any_success = true,
+                                        Err(_) => {
+                                            log::debug!("Removing sender {} because it seems closed", i);
+                                            *sender_opt = None;
+                                        }
+                                    }
+                                }
+                            }
+                            if !any_success {
                                 // cache result if it won't be heard
                                 self.cache[index] = Some(result);
                                 log::debug!("Cached result for item #{}", index);
                             } else {
-                                for (i, sender_opt) in senders.iter_mut().enumerate() {
-                                    if let Some(sender) = sender_opt {
-                                        match sender.send(super::primitive_utils::clone(&result)) {
-                                            Ok(_) => {},
-                                            Err(_) => {
-                                                log::debug!("Removing sender {} because it seems closed", i);
-                                                *sender_opt = None;
-                                            }
-                                        }
-                                    }
-                                }
                                 log::debug!("Routed result for item #{}", index);
                             }
                         } else {

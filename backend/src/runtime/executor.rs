@@ -3,8 +3,14 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, Sender};
 
 use crate::config::{BaseConfig, ElementConfig};
-use super::{QueueItem, QueueAction, Act};
-use super::{ResultRouter, RouterCommand};
+use super::{QueueItem, QueueAction, Act, SeqAct};
+use super::{ResultRouter, RouterCommand, JavascriptRouter, JavascriptCommand};
+
+#[derive(Clone)]
+pub struct RuntimeIO {
+    pub result: Sender<RouterCommand>,
+    pub javascript: Sender<JavascriptCommand>,
+}
 
 pub struct RuntimeExecutor {
     config_data: BaseConfig,
@@ -28,7 +34,7 @@ impl RuntimeExecutor {
 
     fn run_loop(self) {
         let (mut state, tasks_receiver) = self.split();
-        state.populate_router();
+        state.populate_routers();
         for item in tasks_receiver.iter() {
             state.handle_item(item);
         }
@@ -37,7 +43,7 @@ impl RuntimeExecutor {
     fn split(self) -> (ExecutorState, Receiver<QueueItem>) {
         (
             ExecutorState {
-                result_handler: ExecutorState::build_router(self.config_data.items().len()),
+                handlers: ExecutorState::build_routers(self.config_data.items().len()),
                 config_data: self.config_data,
                 config_path: self.config_path,
             },
@@ -47,8 +53,8 @@ impl RuntimeExecutor {
 }
 
 struct ExecutorState {
+    handlers: RuntimeIO,
     config_data: BaseConfig,
-    result_handler: Sender<RouterCommand>,
     config_path: PathBuf,
 }
 
@@ -63,11 +69,11 @@ impl ExecutorState {
                 // trigger update event for element
                 // i.e. on_click, on_toggle, etc. action
                 if let Some(item) = self.config_data.get_item(index) {
-                    match super::Actor::build(item, (index, value)) {
+                    match super::Actor::build(item, (index, &self.handlers)) {
                         Ok(act) => {
-                            let respond_to = self.result_handler.clone();
+                            let respond_to = self.handlers.result.clone();
                             thread::spawn(move || {
-                                let result = act.run();
+                                let result = act.run(value);
                                 match respond_to.send(RouterCommand::HandleResult{index, result}) {
                                     Ok(_) => {},
                                     Err(_) => log::warn!("Failed to send DoUpdate response for item #{}", index),
@@ -83,10 +89,10 @@ impl ExecutorState {
             QueueAction::DoReload { respond_to } => {
                 // reload config file from storage
                 self.config_data = BaseConfig::load(&self.config_path);
-                self.populate_router();
+                self.populate_routers();
                 respond_to.send(self.config_data.items().clone()).unwrap_or(());
             },
-            QueueAction::SetCallback { index, respond_to } => {
+            QueueAction::SetResultCallback { index, respond_to } => {
                 // register a callback with the ResultRouter for an element's action
                 // the next time that action is performed, the result will be sent through the callback
                 if let Some(elem) = self.config_data.get_item(index) {
@@ -94,38 +100,65 @@ impl ExecutorState {
                         ElementConfig::ResultDisplay(c) => c.result_of,
                         _ => index,
                     };
-                    if let Err(e) = self.result_handler.send(
+                    if let Err(e) = self.handlers.result.send(
                         RouterCommand::AddSender {
                             index: display_of,
                             sender: respond_to,
                     }) {
-                        log::warn!("Failed to send to ResultRouter, rebuilding router");
-                        self.result_handler = ExecutorState::build_router(self.config_data.items().len());
-                        if let Err(_) = self.result_handler.send(e.0) {
+                        log::warn!("Failed to send to ResultRouter, rebuilding routers");
+                        self.handlers = ExecutorState::build_routers(self.config_data.items().len());
+                        if let Err(_) = self.handlers.result.send(e.0) {
                             // don't retry if another error occurs
-                            log::error!("Failed to send to ResultRouter again, did not SetCallback for item #{}", index);
+                            log::error!("Failed to send to ResultRouter again, did not SetResultCallback for item #{}", index);
                         }
+                    }
+                }
+            },
+            QueueAction::SetJavascriptSubscriber { respond_to } => {
+                if let Err(e) = self.handlers.javascript.send(
+                    JavascriptCommand::Subscribe {respond_to}) {
+                    log::warn!("Failed to send to JavascriptRouter, rebuilding routers");
+                    self.handlers = ExecutorState::build_routers(self.config_data.items().len());
+                    if let Err(_) = self.handlers.javascript.send(e.0) {
+                        // don't retry if another error occurs
+                        log::error!("Failed to send to JavascriptRouter again, did not SetJavascriptSubscriber");
+                    }
+                }
+            },
+            QueueAction::DoJavascriptResult { value, id } => {
+                if let Err(e) = self.handlers.javascript.send(
+                    JavascriptCommand::Result {value, id}) {
+                    log::warn!("Failed to send to JavascriptRouter, rebuilding routers");
+                    self.handlers = ExecutorState::build_routers(self.config_data.items().len());
+                    if let Err(_) = self.handlers.javascript.send(e.0) {
+                        // don't retry if another error occurs
+                        log::error!("Failed to send to JavascriptRouter again, did not SetJavascriptSubscriber");
                     }
                 }
             }
         }
     }
 
-    fn build_router(items_len: usize) -> Sender<RouterCommand> {
+    fn build_routers(items_len: usize) -> RuntimeIO {
+        let js = JavascriptRouter::build(&(), ()).unwrap();
+        let js_chan = js.run();
         let router = ResultRouter::build(&(), items_len).unwrap();
-        let result = router.run();
-        result
+        let result_chan = router.run();
+        RuntimeIO {
+            javascript: js_chan,
+            result: result_chan,
+        }
     }
 
-    fn populate_router(&mut self) {
-        if let Err(_) = self.result_handler.send(RouterCommand::Clear{}) {
+    fn populate_routers(&mut self) {
+        if let Err(_) = self.handlers.result.send(RouterCommand::Clear{}) {
             return;
         }
         // start reading displays with periodic actions
         for (index, item) in self.config_data.items().iter().enumerate() {
             match item {
                 ElementConfig::ReadingDisplay(r) => {
-                    if let Ok(actor) = super::PeriodicActor::build(r, (index, self.result_handler.clone())) {
+                    if let Ok(actor) = super::PeriodicActor::build(r, (index, &self.handlers)) {
                         actor.run();
                     }
                 },

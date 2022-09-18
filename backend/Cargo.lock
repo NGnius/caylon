@@ -92,6 +92,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0b3de4a0c5e67e16066a0715723abd91edc2f9001d09c46e1dca929351e130e"
 
 [[package]]
+name = "caylon"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "clap",
+ "log",
+ "regex",
+ "serde",
+ "serde_json",
+ "simplelog",
+ "tokio",
+ "usdpl-back",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -417,21 +432,6 @@ name = "itoa"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
-
-[[package]]
-name = "kaylon"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "clap",
- "log",
- "regex",
- "serde",
- "serde_json",
- "simplelog",
- "tokio",
- "usdpl-back",
-]
 
 [[package]]
 name = "libc"

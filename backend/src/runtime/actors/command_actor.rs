@@ -3,13 +3,12 @@ use std::process::Command;
 use usdpl_back::core::serdes::Primitive;
 
 use crate::config::CommandAction;
-use super::{Act, ActError};
+use super::{SeqAct, ActError};
 
 /// Runs a CLI command in Bash
 pub struct CommandActor {
     shell: String,
     run: String,
-    variable: String,
 }
 
 impl CommandActor {
@@ -29,32 +28,31 @@ impl CommandActor {
     }
 }
 
-impl<'a> Act<'a> for CommandActor {
-    type Param = Primitive;
+impl<'a> SeqAct<'a> for CommandActor {
+    type BuildParam = ();
     type Config = CommandAction;
-    type Return = String;
 
-    fn build(config: &'a CommandAction, parameter: Primitive) -> Result<Self, ActError> {
+    fn build(config: &'a CommandAction, _: ()) -> Result<Self, ActError> {
         Ok(
             Self {
                 shell: "bash".to_owned(),
                 run: config.run.clone(),
-                variable: Self::primitive_to_string(parameter),
             }
         )
     }
 
-    fn run(self) -> Self::Return {
+    fn run(self, parameter: Primitive) -> Primitive {
+        let variable = Self::primitive_to_string(parameter);
         let output = Command::new(&self.shell)
             .args(["-c", &self.run])
-            .env(super::VALUE_VAR, &self.variable)
+            .env(super::VALUE_VAR, &variable)
             .output()
             .expect(&format!("Cannot run `{}`", &self.run));
         if !output.stderr.is_empty() {
             log::error!("Error running `{}`: {}", &self.run, String::from_utf8(output.stderr).unwrap_or_else(|_| "<non utf-8 stderr output>".to_owned()))
         }
         let result = String::from_utf8(output.stdout).expect(&format!("Cannot parse stdout from `{}` as UTF-8", self.run));
-        log::debug!("CommandActor ran `{}` (${}=\"{}\") -> `{}`", &self.run, super::VALUE_VAR, &self.variable, &result);
-        result
+        log::debug!("CommandActor ran `{}` (${}=\"{}\") -> `{}`", &self.run, super::VALUE_VAR, &variable, &result);
+        Primitive::String(result)
     }
 }

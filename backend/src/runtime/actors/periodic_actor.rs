@@ -1,30 +1,29 @@
-use std::sync::mpsc::Sender;
 use std::time::Duration;
 
 use usdpl_back::core::serdes::Primitive;
 
 use crate::config::ReadingConfig;
-use super::{Act, ActError, ActorType};
-use crate::runtime::RouterCommand;
+use super::{Act, SeqAct, ActError, TopLevelActorType};
+use crate::runtime::{RouterCommand, RuntimeIO};
 
 /// Runs an action periodically
 pub struct PeriodicActor {
     config: ReadingConfig,
-    result_handler: Sender<RouterCommand>,
+    io: RuntimeIO,
     index: usize,
 }
 
 impl<'a> Act<'a> for PeriodicActor {
-    type Param = (usize, Sender<RouterCommand>);
+    type Param = (usize, &'a RuntimeIO);
     type Config = ReadingConfig;
     type Return = ();
 
     fn build(config: &'a Self::Config, parameter: Self::Param) -> Result<Self, ActError> {
-        ActorType::build(&config.on_period, Primitive::Empty)?;
+        TopLevelActorType::build(&config.on_period, parameter.1)?;
         Ok(
             Self {
                 config: config.clone(),
-                result_handler: parameter.1,
+                io: parameter.1.clone(),
                 index: parameter.0,
             }
         )
@@ -32,17 +31,17 @@ impl<'a> Act<'a> for PeriodicActor {
 
     fn run(self) -> Self::Return {
         std::thread::spawn(move || {
-            let sleep_duration = Duration::from_millis(self.config.period_ms);
+            let sleep_duration = self.config.period_ms.map(|x| Duration::from_millis(x));
             loop {
-                let actor = match ActorType::build(&self.config.on_period, Primitive::Empty) {
+                let actor = match TopLevelActorType::build(&self.config.on_period, &self.io) {
                     Ok(x) => x,
                     Err(e) => {
                         log::error!("PeriodicActor failed to build for item #{}: {}", self.index, e);
                         break;
                     }
                 };
-                let result = actor.run();
-                match self.result_handler.send(RouterCommand::HandleResult {
+                let result = actor.run(Primitive::Empty);
+                match self.io.result.send(RouterCommand::HandleResult {
                     index: self.index, result
                 }) {
                     Ok(_) => {},
@@ -51,7 +50,11 @@ impl<'a> Act<'a> for PeriodicActor {
                         break;
                     }
                 }
-                std::thread::sleep(sleep_duration);
+                if let Some(dur) = sleep_duration {
+                    std::thread::sleep(dur);
+                } else {
+                    break;
+                }
             }
             log::info!("PeriodicActor completed for #{}", self.index);
         });

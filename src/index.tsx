@@ -64,6 +64,33 @@ function onGetElements() {
     console.log("KAYLON: req display for item #" + i.toString());
     backend.resolve(backend.getDisplay(i), displayCallback(i));
   }
+  backend.resolve(backend.getJavascriptToRun(), jsCallback());
+}
+
+const eval2 = eval;
+
+function jsCallback() {
+  return (script: backend.CJavascriptResponse) => {
+    // register next callback (before running JS, in case that crashes)
+    backend.resolve(backend.getJavascriptToRun(), jsCallback());
+    if (script != null) {
+      switch (script.result) {
+        case "javascript":
+          let toRun = script as backend.CJavascriptResult;
+          console.log("KAYLON: Got javascript " + toRun.id.toString(), toRun);
+          let result = eval2(toRun.raw);
+          backend.onJavascriptResult(toRun.id, result);
+          break;
+        case "error":
+          let err = script as backend.CErrorResult;
+          console.warn("KAYLON: Got javascript retrieval error", err);
+          break;
+        default:
+          console.error("KAYLON: Got invalid javascript response", script);
+          break;
+      }
+    }
+  }
 }
 
 // init USDPL WASM frontend
@@ -82,6 +109,7 @@ function onGetElements() {
   } else {
     console.warn("KAYLON: backend connection failed");
   }
+  backend.resolve(backend.getJavascriptToRun(), jsCallback());
 })();
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {

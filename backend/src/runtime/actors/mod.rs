@@ -1,11 +1,15 @@
 mod actor;
 mod command_actor;
+mod javascript_actor;
 mod periodic_actor;
+mod sequential_actor;
 mod transform_actor;
 
-pub use actor::{Actor, Act, ActError, ActorType};
+pub use actor::{Actor, Act, ActError, ActorType, SeqAct, SeqActor, TopLevelActorType};
 pub use command_actor::CommandActor;
+pub use javascript_actor::JavascriptActor;
 pub use periodic_actor::PeriodicActor;
+pub use sequential_actor::SequenceActor;
 pub use transform_actor::TransformActor;
 
-pub const VALUE_VAR: &str = "KAYLON_VALUE";
+pub const VALUE_VAR: &str = "CAYLON_VALUE";

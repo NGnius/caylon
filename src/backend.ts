@@ -79,6 +79,14 @@ export type CValueResult = {
 
 export type CDisplayResponse = CValueResult | CErrorResult;
 
+export type CJavascriptResult = {
+    result: string; // "javascript"
+    id: number;
+    raw: string;
+}
+
+export type CJavascriptResponse = CJavascriptResult | CErrorResult;
+
 export async function getElements(): Promise<CElement[]> {
     return (await call_backend("get_items", []))[0];
 }
@@ -97,4 +105,12 @@ export async function getAbout(): Promise<CAbout> {
 
 export async function reload(): Promise<CElement[]> {
     return (await call_backend("reload", []))[0];
+}
+
+export async function getJavascriptToRun(): Promise<CJavascriptResponse> {
+    return (await call_backend("get_javascript_to_run", []))[0];
+}
+
+export async function onJavascriptResult(id: number, value: any): Promise<any> {
+    return (await call_backend("on_javascript_result", [id, value]))[0];
 }

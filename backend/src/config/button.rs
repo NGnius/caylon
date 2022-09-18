@@ -1,9 +1,9 @@
 use serde::{Serialize, Deserialize};
 
-use super::ActionConfig;
+use super::TopLevelActionConfig;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ButtonConfig {
     pub title: String,
-    pub on_click: ActionConfig,
+    pub on_click: TopLevelActionConfig,
 }

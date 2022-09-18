@@ -16,10 +16,17 @@ pub enum QueueAction {
     DoReload {
         respond_to: Sender<Vec<ElementConfig>>
     },
-    SetCallback {
+    SetResultCallback {
         index: usize,
         respond_to: Sender<Primitive>,
-    }
+    },
+    SetJavascriptSubscriber {
+        respond_to: Sender<crate::api::JavascriptData>,
+    },
+    DoJavascriptResult {
+        id: usize,
+        value: Primitive,
+    },
 }
 
 /// Wrapper for an executor command

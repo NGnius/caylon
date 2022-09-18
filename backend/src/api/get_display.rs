@@ -36,7 +36,7 @@ impl AsyncCallable for GetDisplayEndpoint {
             log::info!("requesting display for item #{}", index);
             let send_result = self.sync_sender.lock().unwrap().send(
                 QueueItem {
-                    action: QueueAction::SetCallback {
+                    action: QueueAction::SetResultCallback {
                         index,
                         respond_to,
                     }

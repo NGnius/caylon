@@ -10,7 +10,7 @@ mod toggle;
 mod transformer;
 
 pub use about::AboutConfig;
-pub use action::{ActionConfig, CommandAction, MirrorAction};
+pub use action::{TopLevelActionConfig, ActionConfig, CommandAction, MirrorAction, SequenceAction, JavascriptAction};
 pub use base::BaseConfig;
 pub use button::ButtonConfig;
 pub use element::ElementConfig;
@@ -30,24 +30,24 @@ mod test {
             items: vec![
                 ElementConfig::Button(ButtonConfig {
                     title: "Test Button".into(),
-                    on_click: ActionConfig::Command(CommandAction{run: "echo 'hello button'".into()}),
+                    on_click: TopLevelActionConfig::Command(CommandAction{run: "echo 'hello button'".into()}),
                 }),
                 ElementConfig::Toggle(ToggleConfig {
                     title: "Test Toggle".into(),
                     description: Some("Toggle description".into()),
-                    on_toggle: ActionConfig::Command(CommandAction{run: "echo 'hello toggle $KAYLON_VALUE'".into()}),
+                    on_toggle: TopLevelActionConfig::Command(CommandAction{run: "echo 'hello toggle $KAYLON_VALUE'".into()}),
                 }),
                 ElementConfig::Slider(SliderConfig {
                     title: "Test Slider".into(),
                     min: 0,
                     max: 3,
                     notches: None,
-                    on_set: ActionConfig::Command(CommandAction{run: "echo 'hello slider'".into()}),
+                    on_set: TopLevelActionConfig::Command(CommandAction{run: "echo 'hello slider'".into()}),
                 }),
                 ElementConfig::ReadingDisplay(ReadingConfig {
                     title: "Test Reading".into(),
-                    period_ms: 10000,
-                    on_period: ActionConfig::Command(CommandAction{run: "echo 'hello reading'".into()})
+                    period_ms: Some(10000),
+                    on_period: TopLevelActionConfig::Command(CommandAction{run: "echo 'hello reading'".into()})
                 }),
                 ElementConfig::ResultDisplay(ResultDisplayConfig {
                     title: "Test Reading".into(),
