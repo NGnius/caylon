@@ -12,6 +12,22 @@ pub struct RuntimeIO {
     pub javascript: Sender<JavascriptCommand>,
 }
 
+#[cfg(test)]
+impl RuntimeIO {
+    pub fn mock() -> (Self, Receiver<RouterCommand>, Receiver<JavascriptCommand>) {
+        let (s1, r1) = mpsc::channel();
+        let (s2, r2) = mpsc::channel();
+        (
+            Self {
+                result: s1,
+                javascript: s2,
+            },
+            r1,
+            r2,
+        )
+    }
+}
+
 pub struct RuntimeExecutor {
     config_data: BaseConfig,
     tasks_receiver: Receiver<QueueItem>,

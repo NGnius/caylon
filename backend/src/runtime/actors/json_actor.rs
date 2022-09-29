@@ -75,3 +75,67 @@ impl<'a> SeqAct<'a> for JsonActor {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::runtime::actors::*;
+    use crate::config::*;
+    use usdpl_back::core::serdes::Primitive;
+
+    #[test]
+    fn json_actor_test() {
+        //let (runtime_io, _result_rx, _js_rx) = crate::runtime::RuntimeIO::mock();
+        SeqActTestHarness::builder(JsonActor::build)
+        // test 1 ---
+            .with_io(
+                (&JsonAction {
+                    jmespath: r"locations[?state == 'WA'].name | sort(@) | {WashingtonCities: join(', ', @)}".into(),
+                },
+                (),
+                Primitive::Json(
+r#"{
+  "locations": [
+    {"name": "Seattle", "state": "WA"},
+    {"name": "New York", "state": "NY"},
+    {"name": "Bellevue", "state": "WA"},
+    {"name": "Olympia", "state": "WA"}
+  ]
+}"#.into()
+                )),
+
+                Expected::Output(Primitive::Json(
+r#"{"WashingtonCities":"Bellevue, Olympia, Seattle"}"#.into()
+                )))
+
+        // test 2 ---
+            .with_io(
+                (&JsonAction {
+                    jmespath: r"locations[?state == 'WA'].name | sort(@) | {WashingtonCities: join(', ', @)}".into(),
+                },
+                (),
+                Primitive::Bool(false)
+                ),
+
+                Expected::Output(Primitive::Empty))
+
+        // test 3 ---
+            .with_io(
+                (&JsonAction {
+                    jmespath: "garb@ge".into(),
+                },
+                (),
+                Primitive::Json(
+r#"{
+  "locations": [
+    {"name": "Seattle", "state": "WA"},
+    {"name": "New York", "state": "NY"},
+    {"name": "Bellevue", "state": "WA"},
+    {"name": "Olympia", "state": "WA"}
+  ]
+}"#.into()
+                )),
+
+                Expected::BuildErr("Failed to compile jmespath `garb@ge`: Parse error: Did not parse the complete expression -- found At (line 0, column 4)\ngarb@ge\n    ^\n".into()))
+            .run();
+    }
+}
