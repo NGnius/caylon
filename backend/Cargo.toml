@@ -14,17 +14,18 @@ clap = { version = "3.2", features = ["derive", "std"], default-features = false
 
 # async
 tokio = { version = "*", features = ["time"] }
-async-trait = "0.1.57"
+async-trait = { version = "0.1.57" }
 
 # json
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde_json = { version = "1.0" }
+jmespath = { version = "0.3", features = [ "sync" ] }
 
 regex = { version = "1" }
 
 # logging
-log = "0.4"
-simplelog = "0.12"
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+simplelog = { version = "0.12" }
 
 [profile.release]
 debug = false

@@ -6,6 +6,7 @@ mod on_javascript_result;
 mod on_update;
 mod reload;
 mod run_js;
+mod steam_types;
 mod types;
 
 pub use about::get_about;
@@ -15,6 +16,7 @@ pub use on_javascript_result::on_javascript_result;
 pub use on_update::on_update;
 pub use reload::reload;
 pub use run_js::{GetJavascriptEndpoint, JavascriptData};
+pub use steam_types::*;
 pub(super) use types::*;
 
 pub(super) type ApiParameterType = Vec<usdpl_back::core::serdes::Primitive>;

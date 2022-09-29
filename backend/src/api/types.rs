@@ -109,3 +109,26 @@ impl ApiJavascriptResult {
         Self::Error(ApiError::new(msg, err))
     }
 }
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(tag = "event")]
+pub enum ApiRegisteredEvent {
+    #[serde(rename = "resume-from-suspend")]
+    ResumeFromSuspend,
+    #[serde(rename = "suspend-from-awake")]
+    SuspendRequest,
+    #[serde(rename = "download-items")]
+    DownloadList(ApiDownloadList),
+    #[serde(rename = "download-overview")]
+    DownloadOverview(super::SteamDownloadOverview),
+    #[serde(rename = "achievement-notification")]
+    AchievementNotification(super::SteamAchievementNotification),
+    #[serde(rename = "error")]
+    Error(ApiError),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ApiDownloadList {
+    pub is_paused: bool,
+    pub list: Vec<super::SteamDownloadInfo>,
+}

@@ -40,19 +40,19 @@ function displayCallback(index: number) {
       switch (newVal.result) {
         case "value":
           let val = newVal as backend.CValueResult;
-          console.log("KAYLON: Got display for " + index.toString(), val);
+          console.log("CAYLON: Got display for " + index.toString(), val);
           set_value(DISPLAY_KEY + index.toString(), val.value);
           break;
         case "error":
           let err = newVal as backend.CErrorResult;
-          console.warn("KAYLON: Got display error for " + index.toString(), err);
+          console.warn("CAYLON: Got display error for " + index.toString(), err);
           break;
         default:
-          console.error("KAYLON: Got invalid display response for " + index.toString(), newVal);
+          console.error("CAYLON: Got invalid display response for " + index.toString(), newVal);
           break;
       }
     } else {
-      console.warn("KAYLON: Ignoring null display result for " + index.toString());
+      console.warn("CAYLON: Ignoring null display result for " + index.toString());
     }
     updateTasks.push(() => backend.resolve(backend.getDisplay(index), displayCallback(index)));
     update();
@@ -61,7 +61,7 @@ function displayCallback(index: number) {
 
 function onGetElements() {
   for (let i = 0; i < items.length; i++) {
-    console.log("KAYLON: req display for item #" + i.toString());
+    console.log("CAYLON: req display for item #" + i.toString());
     backend.resolve(backend.getDisplay(i), displayCallback(i));
   }
   backend.resolve(backend.getJavascriptToRun(), jsCallback());
@@ -77,16 +77,16 @@ function jsCallback() {
       switch (script.result) {
         case "javascript":
           let toRun = script as backend.CJavascriptResult;
-          console.log("KAYLON: Got javascript " + toRun.id.toString(), toRun);
+          console.log("CAYLON: Got javascript " + toRun.id.toString(), toRun);
           let result = eval2(toRun.raw);
           backend.onJavascriptResult(toRun.id, result);
           break;
         case "error":
           let err = script as backend.CErrorResult;
-          console.warn("KAYLON: Got javascript retrieval error", err);
+          console.warn("CAYLON: Got javascript retrieval error", err);
           break;
         default:
-          console.error("KAYLON: Got invalid javascript response", script);
+          console.error("CAYLON: Got invalid javascript response", script);
           break;
       }
     }
@@ -100,14 +100,14 @@ function jsCallback() {
   let about_promise = backend.getAbout();
   let elements_promise = backend.getElements();
   about = await about_promise;
-  console.log("KAYLON: got about", about);
+  console.log("CAYLON: got about", about);
   let result = await elements_promise;
-  console.log("KAYLON: got elements", result);
+  console.log("CAYLON: got elements", result);
   if (result != null) {
     items = result;
     onGetElements();
   } else {
-    console.warn("KAYLON: backend connection failed");
+    console.warn("CAYLON: backend connection failed");
   }
   backend.resolve(backend.getJavascriptToRun(), jsCallback());
 })();
@@ -146,19 +146,19 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
             backend.resolve(backend.reload(),
               (reload_items: backend.CElement[]) => {
                 items = reload_items;
-                console.log("KAYLON: got elements", reload_items);
+                console.log("CAYLON: got elements", reload_items);
                 if (reload_items != null) {
                   items = reload_items;
                   onGetElements();
                 } else {
-                  console.warn("KAYLON: backend connection failed");
+                  console.warn("CAYLON: backend connection failed");
                 }
                 update();
               });
             backend.resolve(backend.getAbout(),
               (new_about: backend.CAbout) => {
                 about = new_about;
-                console.log("KAYLON: got about", about);
+                console.log("CAYLON: got about", about);
                 update();
               });
           }}>
@@ -182,7 +182,7 @@ function buildHtmlElement(element: backend.CElement, index: number, updateIdc: a
     case "result-display":
       return buildResultDisplay(element as backend.CResultDisplay, index, updateIdc);
   }
-  console.error("KAYLON: Unsupported element", element);
+  console.error("CAYLON: Unsupported element", element);
   return <div>Unsupported</div>;
 }
 

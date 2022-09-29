@@ -10,7 +10,7 @@ mod toggle;
 mod transformer;
 
 pub use about::AboutConfig;
-pub use action::{TopLevelActionConfig, ActionConfig, CommandAction, MirrorAction, SequenceAction, JavascriptAction};
+pub use action::{TopLevelActionConfig, ActionConfig, CommandAction, MirrorAction, SequenceAction, JavascriptAction, JsonAction};
 pub use base::BaseConfig;
 pub use button::ButtonConfig;
 pub use element::ElementConfig;

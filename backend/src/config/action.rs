@@ -13,6 +13,8 @@ pub enum TopLevelActionConfig {
     Mirror(MirrorAction),
     #[serde(rename = "javascript")]
     Javascript(JavascriptAction),
+    #[serde(rename = "json")]
+    Json(JsonAction),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -24,6 +26,8 @@ pub enum ActionConfig {
     Transform(super::TransformAction),
     #[serde(rename = "javascript")]
     Javascript(JavascriptAction),
+    #[serde(rename = "json")]
+    Json(JsonAction),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -42,4 +46,9 @@ pub struct MirrorAction;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct JavascriptAction {
     pub run: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct JsonAction {
+    pub jmespath: String,
 }

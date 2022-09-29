@@ -13,8 +13,7 @@ fn main() -> Result<(), ()> {
     let cli_args = cli::CliArgs::cli();
     let log_filepath = cli_args.log.unwrap_or_else(|| format!("/tmp/{}.log", consts::PACKAGE_NAME).into());
     WriteLogger::init(
-        #[cfg(debug_assertions)]{LevelFilter::Debug},
-        #[cfg(not(debug_assertions))]{LevelFilter::Info},
+        LevelFilter::Off,
         Default::default(),
         std::fs::File::create(&log_filepath).expect(&format!("Failed create log file {}", log_filepath.display()))
     ).unwrap();

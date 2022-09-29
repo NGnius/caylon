@@ -52,6 +52,7 @@ pub enum TopLevelActorType {
     Mirror,
     Sequence(super::SequenceActor),
     Javascript(super::JavascriptActor),
+    Json(super::JsonActor),
 }
 
 impl<'a> SeqAct<'a> for TopLevelActorType {
@@ -69,7 +70,9 @@ impl<'a> SeqAct<'a> for TopLevelActorType {
             TopLevelActionConfig::Mirror(_) =>
                 Self::Mirror,
             TopLevelActionConfig::Javascript(j) =>
-                Self::Javascript(super::JavascriptActor::build(j, parameter)?)
+                Self::Javascript(super::JavascriptActor::build(j, parameter)?),
+            TopLevelActionConfig::Json(j) =>
+                Self::Json(super::JsonActor::build(j, ())?),
         })
     }
 
@@ -80,6 +83,7 @@ impl<'a> SeqAct<'a> for TopLevelActorType {
             Self::Mirror => p,
             Self::Sequence(s) => s.run(p),
             Self::Javascript(j) => j.run(p),
+            Self::Json(j) => j.run(p),
         }
     }
 }
@@ -88,6 +92,7 @@ pub enum ActorType {
     Command(super::CommandActor),
     Transform(super::TransformActor),
     Javascript(super::JavascriptActor),
+    Json(super::JsonActor),
 }
 
 impl<'a> SeqAct<'a> for ActorType {
@@ -101,7 +106,9 @@ impl<'a> SeqAct<'a> for ActorType {
             ActionConfig::Transform(t) =>
                 Self::Transform(super::TransformActor::build(t, ())?),
             ActionConfig::Javascript(j) =>
-                Self::Javascript(super::JavascriptActor::build(j, parameter)?)
+                Self::Javascript(super::JavascriptActor::build(j, parameter)?),
+            ActionConfig::Json(j) =>
+                Self::Json(super::JsonActor::build(j, ())?),
         })
     }
 
@@ -110,6 +117,7 @@ impl<'a> SeqAct<'a> for ActorType {
             Self::Command(c) => c.run(p),
             Self::Transform(t) => t.run(p),
             Self::Javascript(j) => j.run(p),
+            Self::Json(j) => j.run(p),
         }
     }
 }
