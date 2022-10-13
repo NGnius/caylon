@@ -127,5 +127,5 @@ export async function onJavascriptResult(id: number, value: any): Promise<boolea
 }
 
 export async function onSteamEvent(data: CSteamEvent): Promise<boolean> {
-    return (await call_backend("on_javascript_result", [data]))[0];
+    return (await call_backend("on_steam_event", [data]))[0];
 }

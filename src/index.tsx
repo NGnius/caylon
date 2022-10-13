@@ -73,11 +73,11 @@ const eval2 = eval;
 
 function jsCallback() {
   return (script: backend.CJavascriptResponse) => {
-    // register next callback (before running JS, in case that crashes)
-    backend.resolve(backend.getJavascriptToRun(), jsCallback());
     if (script != null) {
       switch (script.result) {
         case "javascript":
+          // register next callback (before running JS, in case that crashes)
+          backend.resolve(backend.getJavascriptToRun(), jsCallback());
           let toRun = script as backend.CJavascriptResult;
           console.log("CAYLON: Got javascript " + toRun.id.toString(), toRun);
           let result = eval2(toRun.raw);
@@ -376,7 +376,6 @@ function buildAbout() {
 }
 
 export default definePlugin((serverApi: ServerAPI) => {
-  register_for_steam_events()
   return {
     title: <div className={staticClasses.Title}>{about == null? "Caylon": about.name}</div>,
     content: <Content serverAPI={serverApi} />,

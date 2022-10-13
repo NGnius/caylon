@@ -24,4 +24,3 @@ For building on another Linux PC, Rust toolchain `x86_64-unknown-linux-musl` mus
 ### Distribution
 
 IDK, maybe a bit of custom spins as well as a barebones offering from me
-

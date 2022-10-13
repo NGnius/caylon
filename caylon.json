@@ -116,6 +116,15 @@
       "element": "result-display",
       "title": "JS Test says",
       "result_of": 9
+    },
+    {
+      "element": "event-display",
+      "title": "Now Playing",
+      "event": "game-start",
+      "on_event": {
+        "action": "json",
+        "jmespath": "join(' ', [action, to_string(gameID)])"
+      }
     }
   ],
   "about": {

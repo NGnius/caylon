@@ -251,6 +251,6 @@ pub struct SteamAppLifetimeNotification {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SteamGameAction {
     pub param0: usize, // idk what this is supposed to indicate
-    pub gameID: usize,
+    pub gameID: String, // almost definitely a valid integer
     pub action: String, // idk what possible values are
 }
