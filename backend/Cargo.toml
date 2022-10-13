@@ -14,7 +14,7 @@ clap = { version = "3.2", features = ["derive", "std"], default-features = false
 
 # async
 tokio = { version = "*", features = ["time"] }
-async-trait = { version = "0.1.57" }
+async-trait = { version = "0.1" }
 
 # json
 serde = { version = "1.0", features = ["derive"] }

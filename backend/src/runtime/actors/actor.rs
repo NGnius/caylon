@@ -31,6 +31,7 @@ impl<'a> SeqAct<'a> for Actor {
             ElementConfig::Slider(s) => TopLevelActorType::build(&s.on_set, parameter.1),
             ElementConfig::ReadingDisplay(r) => TopLevelActorType::build(&r.on_period, parameter.1),
             ElementConfig::ResultDisplay(_) => Err(format!("Item #{} is a ResultDisplay, which can't act", i)),
+            ElementConfig::EventDisplay(e) => TopLevelActorType::build(&e.on_event, parameter.1),
         }?;
         Ok(Self {
             actor_type: a_type,
@@ -168,6 +169,7 @@ where
     outputs: std::collections::VecDeque<Expected>,
 }
 
+#[cfg(test)]
 pub enum Expected {
     Output(Primitive),
     BuildErr(ActError),

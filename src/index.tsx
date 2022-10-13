@@ -21,6 +21,7 @@ import { GiWashingMachine } from "react-icons/gi";
 
 import { get_value, set_value } from "usdpl-front";
 import * as backend from "./backend";
+import {register_for_steam_events, unregister_for_steam_events} from "./steam_events";
 
 const FieldWithSeparator = joinClassNames(gamepadDialogClasses.Field, gamepadDialogClasses.WithBottomSeparatorStandard);
 
@@ -65,6 +66,7 @@ function onGetElements() {
     backend.resolve(backend.getDisplay(i), displayCallback(i));
   }
   backend.resolve(backend.getJavascriptToRun(), jsCallback());
+  register_for_steam_events();
 }
 
 const eval2 = eval;
@@ -110,6 +112,7 @@ function jsCallback() {
     console.warn("CAYLON: backend connection failed");
   }
   backend.resolve(backend.getJavascriptToRun(), jsCallback());
+  register_for_steam_events();
 })();
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
@@ -181,6 +184,8 @@ function buildHtmlElement(element: backend.CElement, index: number, updateIdc: a
       return buildReading(element as backend.CReading, index, updateIdc);
     case "result-display":
       return buildResultDisplay(element as backend.CResultDisplay, index, updateIdc);
+    case "event-display":
+      return buildEventDisplay(element as backend.CEventDisplay, index, updateIdc);
   }
   console.error("CAYLON: Unsupported element", element);
   return <div>Unsupported</div>;
@@ -246,6 +251,17 @@ function buildReading(element: backend.CReading, index: number, _updateIdc: any)
 }
 
 function buildResultDisplay(element: backend.CResultDisplay, index: number, _updateIdc: any) {
+  return (
+    <div className={FieldWithSeparator}>
+      <div className={gamepadDialogClasses.FieldLabelRow}>
+        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
+        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
+      </div>
+    </div>
+  );
+}
+
+function buildEventDisplay(element: backend.CEventDisplay, index: number, _updateIdc: any) {
   return (
     <div className={FieldWithSeparator}>
       <div className={gamepadDialogClasses.FieldLabelRow}>
@@ -360,12 +376,13 @@ function buildAbout() {
 }
 
 export default definePlugin((serverApi: ServerAPI) => {
+  register_for_steam_events()
   return {
-    title: <div className={staticClasses.Title}>{about == null? "Kaylon": about.name}</div>,
+    title: <div className={staticClasses.Title}>{about == null? "Caylon": about.name}</div>,
     content: <Content serverAPI={serverApi} />,
     icon: <GiWashingMachine />,
     onDismount() {
-      //serverApi.routerHook.removeRoute("/decky-plugin-test");
+      unregister_for_steam_events();
     },
   };
 });

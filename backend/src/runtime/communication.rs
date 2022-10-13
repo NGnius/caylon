@@ -2,6 +2,7 @@ use std::sync::mpsc::Sender;
 
 use usdpl_back::core::serdes::Primitive;
 
+use crate::api::SteamEvent;
 use crate::config::{AboutConfig, ElementConfig};
 
 /// An API operation for the executor to perform
@@ -26,6 +27,9 @@ pub enum QueueAction {
     DoJavascriptResult {
         id: usize,
         value: Primitive,
+    },
+    DoSteamEvent {
+        event: SteamEvent,
     },
 }
 

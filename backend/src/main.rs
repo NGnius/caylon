@@ -33,6 +33,7 @@ fn main() -> Result<(), ()> {
         .register_blocking("get_items", api::get_items(sender.clone()))
         .register("on_javascript_result", api::on_javascript_result(sender.clone()))
         .register("on_update", api::on_update(sender.clone()))
+        .register("on_event", api::on_event(sender.clone()))
         .register_blocking("reload", api::reload(sender.clone()));
     let _exec_handle = executor.spawn();
     instance.run_blocking()

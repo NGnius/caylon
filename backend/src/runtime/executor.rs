@@ -2,9 +2,42 @@ use std::thread;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::{self, Receiver, Sender};
 
+use usdpl_back::core::serdes::Primitive;
+
 use crate::config::{BaseConfig, ElementConfig};
+use crate::api::SteamEvent;
 use super::{QueueItem, QueueAction, Act, SeqAct};
 use super::{ResultRouter, RouterCommand, JavascriptRouter, JavascriptCommand};
+
+macro_rules! wire_steam_event {
+    (
+        $func_name: ident,
+        $display_name: literal,
+        $self: ident,
+        $conf: ident,
+        $item: ident,
+        $index: ident,
+        $event: ident,
+        $event_json_cache: ident,
+    ) => {
+        if $conf.event.$func_name() {
+            let value = cache_event_maybe(&$event, &mut $event_json_cache);
+            match super::Actor::build($item, ($index, &$self.handlers)) {
+                Ok(act) => {
+                    let respond_to = $self.handlers.result.clone();
+                    thread::spawn(move || {
+                        let result = act.run(value);
+                        match respond_to.send(RouterCommand::HandleResult{$index, result}) {
+                            Ok(_) => {},
+                            Err(_) => log::warn!("Failed to send DoSteamEvent `{}` response for item #{}", $display_name, $index),
+                        }
+                    });
+                },
+                Err(e) => log::error!("Failed to build DoSteamEvent `{}` actor for item #{}: {}", $display_name, $index, e)
+            }
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct RuntimeIO {
@@ -83,7 +116,7 @@ impl ExecutorState {
             },
             QueueAction::DoUpdate { index, value } => {
                 // trigger update event for element
-                // i.e. on_click, on_toggle, etc. action
+                // e.g. on_click, on_toggle, etc. action
                 if let Some(item) = self.config_data.get_item(index) {
                     match super::Actor::build(item, (index, &self.handlers)) {
                         Ok(act) => {
@@ -151,6 +184,97 @@ impl ExecutorState {
                         log::error!("Failed to send to JavascriptRouter again, did not SetJavascriptSubscriber");
                     }
                 }
+            },
+            QueueAction::DoSteamEvent { event } => {
+                // handle steam event for all elements that may be listening
+                let mut event_json_cache: Option<String> = None;
+                for (index, item) in self.config_data.items().iter().enumerate() {
+                    match item {
+                        ElementConfig::EventDisplay(conf) => {
+                            match &event {
+                                SteamEvent::DownloadItems(_x) => log::error!("Unsupported event"),
+                                SteamEvent::DownloadOverview(_x) => log::error!("Unsupported event"),
+                                SteamEvent::AchievementNotification(x) => wire_steam_event!{
+                                    is_achievement,
+                                    "achievement",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::BluetoothState(x) => wire_steam_event!{
+                                    is_bluetooth,
+                                    "bluetooth",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::ConnectivityTestChange(_x) => log::error!("Unsupported event"),
+                                SteamEvent::NetworkDiagnostic(_x) => log::error!("Unsupported event"),
+                                SteamEvent::AudioDeviceAdded(_x) => log::error!("Unsupported event"),
+                                SteamEvent::AudioDeviceRemoved(_x) => log::error!("Unsupported event"),
+                                SteamEvent::Brightness(x) => wire_steam_event!{
+                                    is_brightness,
+                                    "brightness",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::Airplane(x) => wire_steam_event!{
+                                    is_airplane,
+                                    "airplane",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::Battery(_x) => log::error!("Unsupported event"),
+                                SteamEvent::ScreenshotNotification(x) => wire_steam_event!{
+                                    is_screenshot,
+                                    "screenshot",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::ControllerInputMessage(_x) => log::error!("Unsupported event"),
+                                SteamEvent::AppLifetimeNotification(x) => wire_steam_event!{
+                                    is_game_lifetime,
+                                    "game-lifetime",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                                SteamEvent::GameActionStart(x) => wire_steam_event!{
+                                    is_game_start,
+                                    "game-start",
+                                    self,
+                                    conf,
+                                    item,
+                                    index,
+                                    x,
+                                    event_json_cache,
+                                },
+                            }
+                        }
+                        _ => {}
+                    }
+                }
             }
         }
     }
@@ -181,5 +305,16 @@ impl ExecutorState {
                 _ => {}
             }
         }
+    }
+}
+
+#[inline]
+fn cache_event_maybe<T: serde::Serialize>(event: &T, cache: &mut Option<String>) -> Primitive {
+    if let Some(cached) = cache {
+        Primitive::Json(cached.to_owned())
+    } else {
+        let dump = serde_json::to_string(event).unwrap();
+        *cache = Some(dump.clone());
+        Primitive::Json(dump)
     }
 }

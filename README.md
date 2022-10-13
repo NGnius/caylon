@@ -1,6 +1,8 @@
-# React-Frontend Plugin Template 
+# Caylon
 
-Reference example for using [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) in a [PluginLoader](https://github.com/SteamDeckHomebrew/PluginLoader) plugin.
+Custom widgets for simple tasks.
+
+Adapted from a template for using [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) in a [Decky Loader](https://github.com/SteamDeckHomebrew/PluginLoader) plugin.
 
 ## PluginLoader Discord [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/ZU74G2NJzk)
 
@@ -8,30 +10,18 @@ Reference example for using [decky-frontend-lib](https://github.com/SteamDeckHom
 
 ### Dependencies
 
-This template relies on the user having `pnpm` installed on their system.  
-This can be downloaded from `npm` itself which is recommended. 
-
-#### Linux
-
-```bash
-sudo npm i -g pnpm
-```
+This project relies on `npm` and `rustup`.
+For building on another Linux PC, Rust toolchain `x86_64-unknown-linux-musl` must also be installed.
 
 ### Getting Started
 
 1. Clone the repository to use as an example for making your plugin.
-2. In your clone of the repository run these commands:
-   1. ``pnpm i``
-   2. ``pnpm run build``
-3. You should do this every time you make changes to your plugin.
-
-Note: If you are recieveing build errors due to an out of date library, you should run this command inside of your repository:
-
-```bash
-pnpm update decky-frontend-lib --latest
-```
+2. In your clone of the repository run these commands to build the front-end:
+   1. ``npm install``
+   2. ``npm run build``
+3. From `backend/`, Run `./build.sh` to build the back-end.
 
 ### Distribution
 
-WIP. Check back in later.
+IDK, maybe a bit of custom spins as well as a barebones offering from me
 

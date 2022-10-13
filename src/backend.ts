@@ -4,7 +4,7 @@ const USDPL_PORT: number = 25717;
 
 // Utility
 
-export function resolve(promise: Promise<any>, setter: any) {
+export function resolve<T>(promise: Promise<T>, setter: (x: T) => void) {
     (async function () {
         let data = await promise;
         if (data != null) {
@@ -64,7 +64,18 @@ export type CResultDisplay = {
     result_of: number;
 }
 
-export type CElement = CButton | CToggle | CSlider | CReading | CResultDisplay;
+export type CEventDisplay = {
+    element: string; // "event-display"
+    title: string;
+    event: string;
+}
+
+export type CSteamEvent = {
+    event_type: string; // enum; see steam_types.rs
+    event_data: any;
+}
+
+export type CElement = CButton | CToggle | CSlider | CReading | CResultDisplay | CEventDisplay;
 
 export type CErrorResult = {
     result: string; // "error"
@@ -91,7 +102,7 @@ export async function getElements(): Promise<CElement[]> {
     return (await call_backend("get_items", []))[0];
 }
 
-export async function onUpdate(index: number, value: any): Promise<any> {
+export async function onUpdate(index: number, value: any): Promise<boolean> {
     return (await call_backend("on_update", [index, value]))[0];
 }
 
@@ -111,6 +122,10 @@ export async function getJavascriptToRun(): Promise<CJavascriptResponse> {
     return (await call_backend("get_javascript_to_run", []))[0];
 }
 
-export async function onJavascriptResult(id: number, value: any): Promise<any> {
+export async function onJavascriptResult(id: number, value: any): Promise<boolean> {
     return (await call_backend("on_javascript_result", [id, value]))[0];
+}
+
+export async function onSteamEvent(data: CSteamEvent): Promise<boolean> {
+    return (await call_backend("on_javascript_result", [data]))[0];
 }

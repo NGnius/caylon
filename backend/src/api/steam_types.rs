@@ -1,14 +1,56 @@
 #![allow(non_snake_case)]
 use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(tag = "event_type", content = "event_data")]
+pub enum SteamEvent {
+    #[serde(rename = "download-items")]
+    DownloadItems(SteamDownloadInfo),
+    #[serde(rename = "download-overview")]
+    DownloadOverview(SteamDownloadOverview),
+    #[serde(rename = "achievement-notification")]
+    AchievementNotification(SteamAchievementNotification),
+    #[serde(rename = "bluetooth-state")]
+    BluetoothState(SteamBluetoothState),
+    #[serde(rename = "connectivity-test-change")]
+    ConnectivityTestChange(SteamConnectivityTestChange),
+    #[serde(rename = "network-diagnostic")]
+    NetworkDiagnostic(SteamNetworkDiagnostic),
+    #[serde(rename = "audio-device-added")]
+    AudioDeviceAdded(SteamAudioDevice),
+    #[serde(rename = "audio-device-removed")]
+    AudioDeviceRemoved(SteamAudioDevice),
+    #[serde(rename = "brightness")]
+    Brightness(SteamBrightness),
+    #[serde(rename = "airplane")]
+    Airplane(SteamAirplane),
+    #[serde(rename = "battery")]
+    Battery(SteamBattery),
+    #[serde(rename = "screenshot-notification")]
+    ScreenshotNotification(SteamScreenshotNotification),
+    #[serde(rename = "controller-input-message")]
+    ControllerInputMessage(Vec<SteamControllerInputMessage>),
+    #[serde(rename = "app-lifetime-notification")]
+    AppLifetimeNotification(SteamAppLifetimeNotification),
+    #[serde(rename = "game-action-start")]
+    GameActionStart(SteamGameAction),
+}
+
 // list of these is second callback param for SteamClient.Downloads.RegisterForDownloadItems
 #[derive(Serialize, Deserialize, Clone)]
-pub struct SteamDownloadInfo {
+pub struct SteamDownloadItem {
     pub active: bool,
     pub appid: usize,
     pub buildid: usize,
     pub target_buildid: usize,
     pub paused: bool,
+}
+
+// both params for callback for SteamClient.Downloads.RegisterForDownloadItems
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SteamDownloadInfo {
+    pub paused: bool,
+    pub items: Vec<SteamDownloadItem>,
 }
 
 // only callback param for SteamClient.Downloads.RegisterForDownloadOverview
@@ -103,7 +145,7 @@ pub struct SteamNetworkDiagnostic {
 }
 
 // only param of callback for SteamClient.System.Audio.RegisterForDeviceAdded
-// and SteamClient.System.Audio.RegisterForDeviceAdded
+// and SteamClient.System.Audio.RegisterForDeviceRemoved
 // Also type of vecDevices of await SteamClient.System.Audio.GetDevices()
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SteamAudioDevice {
@@ -195,4 +237,20 @@ pub struct SteamControllerInputMessage {
     pub bState: bool,
     pub nController: usize,
     pub strActionName: String,
+}
+
+// only param of callback for SteamClient.GameSessions.RegisterForAppLifetimeNotifications
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SteamAppLifetimeNotification {
+    pub bRunning: bool,
+    pub nInstanceID: usize,
+    pub unAppID: usize,
+}
+
+// params of callback for SteamClient.Apps.RegisterForGameActionStart
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SteamGameAction {
+    pub param0: usize, // idk what this is supposed to indicate
+    pub gameID: usize,
+    pub action: String, // idk what possible values are
 }

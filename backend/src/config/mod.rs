@@ -3,6 +3,7 @@ mod action;
 mod base;
 mod button;
 mod element;
+mod event_display;
 mod reading;
 mod result_display;
 mod slider;
@@ -14,6 +15,7 @@ pub use action::{TopLevelActionConfig, ActionConfig, CommandAction, MirrorAction
 pub use base::BaseConfig;
 pub use button::ButtonConfig;
 pub use element::ElementConfig;
+pub use event_display::{EventDisplayConfig, EventType};
 pub use reading::ReadingConfig;
 pub use result_display::ResultDisplayConfig;
 pub use slider::SliderConfig;
