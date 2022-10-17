@@ -31,6 +31,7 @@ fn main() -> Result<(), ()> {
         .register_async("get_display", api::GetDisplayEndpoint::new(sender.clone()))
         .register_async("get_javascript_to_run", api::GetJavascriptEndpoint::new(sender.clone()))
         .register_blocking("get_items", api::get_items(sender.clone()))
+        .register("log", api::log_it())
         .register("on_javascript_result", api::on_javascript_result(sender.clone()))
         .register("on_update", api::on_update(sender.clone()))
         .register("on_steam_event", api::on_event(sender.clone()))

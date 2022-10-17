@@ -25,7 +25,7 @@ pub fn on_event(sender: Sender<QueueItem>) -> impl Fn(ApiParameterType) -> ApiPa
                     vec![true.into()]
                 },
                 Err(e) => {
-                    log::warn!("Failed to parse event json: {}", e);
+                    log::error!("Failed to parse event json: {}", e);
                     vec![false.into()]
                 }
             }

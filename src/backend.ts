@@ -98,6 +98,14 @@ export type CJavascriptResult = {
 
 export type CJavascriptResponse = CJavascriptResult | CErrorResult;
 
+export enum CLogLevel {
+    TRACE = 1,
+    DEBUG = 2,
+    INFO = 3,
+    WARN = 4,
+    ERROR = 5,
+}
+
 export async function getElements(): Promise<CElement[]> {
     return (await call_backend("get_items", []))[0];
 }
@@ -128,4 +136,8 @@ export async function onJavascriptResult(id: number, value: any): Promise<boolea
 
 export async function onSteamEvent(data: CSteamEvent): Promise<boolean> {
     return (await call_backend("on_steam_event", [data]))[0];
+}
+
+export async function log(level: CLogLevel, msg: string): Promise<boolean> {
+    return (await call_backend("log", [level, msg]))[0];
 }
