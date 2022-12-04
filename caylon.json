@@ -125,6 +125,24 @@
         "action": "json",
         "jmespath": "join(' ', [action, to_string(gameID)])"
       }
+    },
+    {
+      "element": "event-display",
+      "title": "JSON -> JS -> Out",
+      "event": "game-start",
+      "on_event": {
+        "action": "sequence",
+        "steps": [
+          {
+            "action": "json",
+            "jmespath": "join(' ', [action, to_string(gameID)])"
+          },
+          {
+            "action": "javascript",
+            "run": "console.warn(\"TEST CAYLON game started\", CAYLON_VALUE); CAYLON_VALUE"
+          }
+        ]
+      }
     }
   ],
   "about": {
