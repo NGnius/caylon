@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #cargo build --release --target x86_64-unknown-linux-musl --features encrypt
-cargo build --target x86_64-unknown-linux-musl --features encrypt
+cargo build --target x86_64-unknown-linux-musl --features $1
 #cross build --release --features encrypt
 
 mkdir -p ../bin

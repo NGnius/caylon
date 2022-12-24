@@ -1217,9 +1217,9 @@ dependencies = [
 
 [[package]]
 name = "usdpl-back"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58928ed65332c30b9b9be5140fcdab97e45db679a5845d829aa26492765272e5"
+checksum = "e2ff8cc372a3b876bdbad212a398b06127bdb67603bce621d4148a50f1195372"
 dependencies = [
  "async-recursion",
  "async-trait",

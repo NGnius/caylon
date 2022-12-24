@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/NGnius/kaylon"
 
 [dependencies]
-usdpl-back = { version = "0.7.2"}
+usdpl-back = { version = "0.8.0"}
 
 clap = { version = "3.2", features = ["derive", "std"], default-features = false }
 
@@ -28,7 +28,7 @@ log = { version = "0.4" }
 simplelog = { version = "0.12" }
 
 [features]
-default = ["decky"]
+default = []
 decky = ["usdpl-back/decky"]
 encrypt = ["usdpl-back/encrypt"]
 

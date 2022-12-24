@@ -11,6 +11,6 @@ class Plugin:
     # Asyncio-compatible long-running code, executed in a task when the plugin is loaded
     async def _main(self):
         # startup
-        self.backend_proc = subprocess.Popen([PARENT_DIR + "/bin/backend", "--config", ""])
+        self.backend_proc = subprocess.Popen([PARENT_DIR + "/bin/backend", "--config", "./caylon.json"])
         while True:
             await asyncio.sleep(1)

@@ -10,23 +10,16 @@ import {
   ServerAPI,
   //showContextMenu,
   staticClasses,
-  SliderField,
-  ToggleField,
-  //NotchLabel
-  gamepadDialogClasses,
-  joinClassNames,
 } from "decky-frontend-lib";
 import { VFC, useState } from "react";
 import { GiWashingMachine } from "react-icons/gi";
 
-import { get_value, set_value } from "usdpl-front";
+import { set_value } from "usdpl-front";
 import * as backend from "./backend";
 import {register_for_steam_events, unregister_for_steam_events} from "./steam_events";
-
-const FieldWithSeparator = joinClassNames(gamepadDialogClasses.Field, gamepadDialogClasses.WithBottomSeparatorStandard);
-
-const DISPLAY_KEY = "display";
-const VALUE_KEY = "value";
+import {DISPLAY_KEY} from "./consts";
+import {Elements} from "./components/elements";
+import {About} from "./components/about";
 
 let items: backend.CElement[] = [];
 let about: backend.CAbout | null = null;
@@ -167,10 +160,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
     updateInternal(!triggerInternal);
   }
 
-  function updateIdc(_: any) {
-    update();
-  }
-
   // perform tasks (like updating display elements) only while rendering the plugin
   let taskItem = updateTasks.pop();
   while (taskItem != undefined) {
@@ -180,12 +169,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
 
   return (
     <PanelSection>
-      {items.map(
-        (elem, i) => {
-          return <PanelSectionRow>{buildHtmlElement(elem, i, updateIdc)}</PanelSectionRow>
-        })
-      }
-      { about != null && buildAbout() }
+      <Elements items={items}/>
+      <About about={about}/>
       <PanelSectionRow>
         <ButtonItem
           layout="below"
@@ -218,210 +203,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
     </PanelSection>
   );
 };
-
-function buildHtmlElement(element: backend.CElement, index: number, updateIdc: any) {
-  switch (element.element) {
-    case "button":
-      return buildButton(element as backend.CButton, index, updateIdc);
-    case "slider":
-      return buildSlider(element as backend.CSlider, index, updateIdc);
-    case "toggle":
-      return buildToggle(element as backend.CToggle, index, updateIdc);
-    case "reading":
-      return buildReading(element as backend.CReading, index, updateIdc);
-    case "result-display":
-      return buildResultDisplay(element as backend.CResultDisplay, index, updateIdc);
-    case "event-display":
-      return buildEventDisplay(element as backend.CEventDisplay, index, updateIdc);
-  }
-  console.error("CAYLON: Unsupported element", element);
-  backend.log(backend.CLogLevel.ERROR, "Unsupported element " + element.element);
-  return <div>Unsupported</div>;
-}
-
-function buildButton(element: backend.CButton, index: number, updateIdc: any) {
-  return (
-    <ButtonItem
-      layout="below"
-      onClick={() => {backend.resolve(backend.onUpdate(index, null), updateIdc)}}>
-      {element.title}
-    </ButtonItem>
-  );
-}
-
-function buildSlider(element: backend.CSlider, index: number, updateIdc: any) {
-  const KEY = VALUE_KEY + index.toString();
-  if (get_value(KEY) == null) {
-    set_value(KEY, element.min);
-  }
-  return (
-    <SliderField
-      label={element.title}
-      value={get_value(KEY)}
-      max={element.max}
-      min={element.min}
-      showValue={true}
-      onChange={(value: number) => {
-        backend.resolve(backend.onUpdate(index, value), updateIdc);
-        set_value(KEY, value);
-      }}
-    />
-  );
-}
-
-function buildToggle(element: backend.CToggle, index: number, updateIdc: any) {
-  const KEY = VALUE_KEY + index.toString();
-  if (get_value(KEY) == null) {
-    set_value(KEY, false);
-  }
-  return (
-    <ToggleField
-      checked={get_value(KEY)}
-      label={element.title}
-      description={element.description!}
-      onChange={(value: boolean) => {
-        backend.resolve(backend.onUpdate(index, value), updateIdc);
-        set_value(KEY, value);
-      }}
-    />
-  );
-}
-
-function buildReading(element: backend.CReading, index: number, _updateIdc: any) {
-  return (
-    <div className={FieldWithSeparator}>
-      <div className={gamepadDialogClasses.FieldLabelRow}>
-        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
-        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
-      </div>
-    </div>
-  );
-}
-
-function buildResultDisplay(element: backend.CResultDisplay, index: number, _updateIdc: any) {
-  return (
-    <div className={FieldWithSeparator}>
-      <div className={gamepadDialogClasses.FieldLabelRow}>
-        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
-        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
-      </div>
-    </div>
-  );
-}
-
-function buildEventDisplay(element: backend.CEventDisplay, index: number, _updateIdc: any) {
-  return (
-    <div className={FieldWithSeparator}>
-      <div className={gamepadDialogClasses.FieldLabelRow}>
-        <div className={gamepadDialogClasses.FieldLabel}>{element.title}</div>
-        <div className={gamepadDialogClasses.FieldChildren}>{get_value(DISPLAY_KEY + index.toString())}</div>
-      </div>
-    </div>
-  );
-}
-
-function buildAbout() {
-  if (about == null) {
-    return [];
-  } else {
-    let elements = [
-      <div className={staticClasses.PanelSectionTitle}>
-        About
-      </div>,
-      <PanelSectionRow>
-        <div className={FieldWithSeparator}>
-          <div className={gamepadDialogClasses.FieldLabelRow}>
-            <div className={gamepadDialogClasses.FieldLabel}>Name</div>
-            <div className={gamepadDialogClasses.FieldChildren}>{about.name}</div>
-          </div>
-        </div>
-      </PanelSectionRow>,
-      <PanelSectionRow>
-        <div className={FieldWithSeparator}>
-          <div className={gamepadDialogClasses.FieldLabelRow}>
-            <div className={gamepadDialogClasses.FieldLabel}>Version</div>
-            <div className={gamepadDialogClasses.FieldChildren}>{about.version}</div>
-          </div>
-        </div>
-      </PanelSectionRow>,
-      <PanelSectionRow>
-        <div className={FieldWithSeparator}>
-          <div className={gamepadDialogClasses.FieldLabelRow}>
-            <div className={gamepadDialogClasses.FieldLabel}>Description</div>
-            <div className={gamepadDialogClasses.FieldDescription}>{about.description}</div>
-          </div>
-        </div>
-      </PanelSectionRow>
-    ];
-    if (about.url != null) {
-      elements.push(
-        <PanelSectionRow>
-          <div className={FieldWithSeparator}>
-            <div className={gamepadDialogClasses.FieldLabelRow}>
-              <div className={gamepadDialogClasses.FieldLabel}>URL</div>
-              <div className={gamepadDialogClasses.FieldDescription}>{about.url}</div>
-            </div>
-          </div>
-        </PanelSectionRow>
-      );
-    }
-    if (about.authors.length > 1) {
-      let authors = about.authors.map((elem, i) => {
-        if (i == about!.authors.length - 1) {
-          return <p>{elem}</p>;
-        } else {
-          return <span>{elem}</span>;
-        }
-      });
-      elements.push(
-        <PanelSectionRow>
-          <div className={FieldWithSeparator}>
-            <div className={gamepadDialogClasses.FieldLabelRow}>
-              <div className={gamepadDialogClasses.FieldLabel}>Authors</div>
-              <div className={gamepadDialogClasses.FieldDescription}>{authors}</div>
-            </div>
-          </div>
-        </PanelSectionRow>
-      );
-    } else if (about.authors.length == 1) {
-      elements.push(
-        <PanelSectionRow>
-          <div className={FieldWithSeparator}>
-            <div className={gamepadDialogClasses.FieldLabelRow}>
-              <div className={gamepadDialogClasses.FieldLabel}>Author</div>
-              <div className={gamepadDialogClasses.FieldDescription}>{about.authors[0]}</div>
-            </div>
-          </div>
-        </PanelSectionRow>
-      );
-    } else {
-      elements.push(
-        <PanelSectionRow>
-          <div className={FieldWithSeparator}>
-            <div className={gamepadDialogClasses.FieldLabelRow}>
-              <div className={gamepadDialogClasses.FieldLabel}>Author</div>
-              <div className={gamepadDialogClasses.FieldDescription}>NGnius</div>
-            </div>
-          </div>
-        </PanelSectionRow>
-      );
-    }
-
-    if (about.license != null) {
-      elements.push(
-        <PanelSectionRow>
-          <div className={FieldWithSeparator}>
-            <div className={gamepadDialogClasses.FieldLabelRow}>
-              <div className={gamepadDialogClasses.FieldLabel}>License</div>
-              <div className={gamepadDialogClasses.FieldChildren}>{about.license}</div>
-            </div>
-          </div>
-        </PanelSectionRow>
-      );
-    }
-    return elements;
-  }
-}
 
 export default definePlugin((serverApi: ServerAPI) => {
   return {
