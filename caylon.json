@@ -51,7 +51,7 @@
     },
     {
       "element": "reading",
-      "title": "Fan Speed",
+      "title": "Fan Speed Frozen",
       "period_ms": null,
       "on_period": {
         "action": "sequence",
@@ -109,7 +109,7 @@
       "notches": null,
       "on_set": {
         "action": "javascript",
-        "run": "console.warn(\"YAAAAAAAAAAAAAAAAAAAAAAAAAAAARG JS Slider is now\", CAYLON_VALUE); \"JS Result\""
+        "run": "console.warn(\"YAAAAAAAAAAAAAAAAAAAAAAAAAAAARG JS Slider is now\", CAYLON_VALUE); \"JS Result \" + CAYLON_VALUE"
       }
     },
     {
@@ -140,6 +140,27 @@
           {
             "action": "javascript",
             "run": "console.warn(\"TEST CAYLON game started\", CAYLON_VALUE); CAYLON_VALUE"
+          }
+        ]
+      }
+    },
+    {
+      "element": "reading",
+      "title": "Fan Speed fast",
+      "period_ms": 100,
+      "on_period": {
+        "action": "sequence",
+        "steps": [
+          {
+            "action": "command",
+            "run": "cat /sys/class/hwmon/hwmon5/fan1_input"
+          },
+          {
+            "action": "transform",
+            "transformer": {
+              "rule": "expand",
+              "format": "$CAYLON_VALUE RPM"
+            }
           }
         ]
       }

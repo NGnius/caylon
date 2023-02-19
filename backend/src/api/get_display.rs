@@ -47,7 +47,7 @@ impl AsyncCallable for GetDisplayEndpoint {
                     log::info!("waiting for display for item #{}", index);
                     match super::async_utils::channel_recv(receiver).await {
                         Err(_) => {
-                                let msg = format!("Failed to response for get_display for #{}", index);
+                                let msg = format!("Failed to get response for get_display for #{}", index);
                                 log::warn!("{}", msg);
                                 return vec![ApiDisplayResult::failure(msg, "receiving channel disconnected").to_primitive()];
                         },

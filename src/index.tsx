@@ -14,10 +14,10 @@ import {
 import { VFC, useState } from "react";
 import { GiWashingMachine } from "react-icons/gi";
 
-import { set_value } from "usdpl-front";
+//import { set_value } from "usdpl-front";
 import * as backend from "./backend";
 import {register_for_steam_events, unregister_for_steam_events} from "./steam_events";
-import {DISPLAY_KEY} from "./consts";
+//import {DISPLAY_KEY} from "./consts";
 import {Elements} from "./components/elements";
 import {About} from "./components/about";
 
@@ -28,48 +28,24 @@ let update = () => {};
 
 let updateTasks: (() => void)[] = [];
 
-let displayErrors: number[] = [];
-const DISPLAY_ERROR_ABORT_THRESHHOLD = 8;
-
-function displayCallback(index: number) {
-  return (newVal: backend.CDisplayResponse) => {
-    if (newVal != null) {
-      switch (newVal.result) {
-        case "value":
-          displayErrors[index] = 0;
-          let val = newVal as backend.CValueResult;
-          console.log("CAYLON: Got display for " + index.toString(), val);
-          backend.log(backend.CLogLevel.DEBUG, "Got display for " + index.toString());
-          set_value(DISPLAY_KEY + index.toString(), val.value);
-          break;
-        case "error":
-          displayErrors[index]++;
-          let err = newVal as backend.CErrorResult;
-          console.warn("CAYLON: Got display error for " + index.toString(), err);
-          backend.log(backend.CLogLevel.WARN, "Got display error for " + index.toString());
-          break;
-        default:
-          console.error("CAYLON: Got invalid display response for " + index.toString(), newVal);
-          backend.log(backend.CLogLevel.ERROR, "Got invalid display response for " + index.toString());
-          break;
-      }
-    } else {
-      displayErrors[index]++;
-      console.warn("CAYLON: Ignoring null display result for " + index.toString());
-      backend.log(backend.CLogLevel.WARN, "Ignoring null display result for " + index.toString());
-    }
-    if (displayErrors[index] < DISPLAY_ERROR_ABORT_THRESHHOLD) {
-      updateTasks.push(() => backend.resolve(backend.getDisplay(index), displayCallback(index)));
-      update();
-    } else {
-      console.error("CAYLON: Got too many display errors for " + index.toString() + ", stopping display updates for element");
-      backend.log(backend.CLogLevel.ERROR, "Got too many display errors for " + index.toString() + ", stopping display updates for element");
-    }
-  }
+function scheduleCall(cb: () => void) {
+  updateTasks.push(cb);
 }
 
 let jsErrors: number = 0;
-const JAVASCRIPT_ERROR_ABORT_THRESHHOLD = 16;
+const JAVASCRIPT_ERROR_ABORT_THRESHOLD = 16;
+
+let displayErrors: number[] = [];
+
+function displayCallback(index: number) {
+  return (ok: boolean) => {
+    if (ok) {
+      displayErrors[index] = 0;
+    } else {
+      displayErrors[index]++;
+    }
+  }
+}
 
 function onGetElements() {
   displayErrors = [];
@@ -77,7 +53,6 @@ function onGetElements() {
     console.log("CAYLON: req display for item #" + i.toString());
     backend.log(backend.CLogLevel.DEBUG, "req display for item #" + i.toString());
     displayErrors.push(0);
-    backend.resolve(backend.getDisplay(i), displayCallback(i));
   }
   jsErrors = 0;
   backend.resolve(backend.getJavascriptToRun(), jsCallback());
@@ -89,7 +64,7 @@ const eval2 = eval;
 function jsCallback() {
   return (script: backend.CJavascriptResponse) => {
     // register next callback (before running JS, in case that crashes)
-    if (jsErrors < JAVASCRIPT_ERROR_ABORT_THRESHHOLD) {
+    if (jsErrors < JAVASCRIPT_ERROR_ABORT_THRESHOLD) {
       backend.resolve(backend.getJavascriptToRun(), jsCallback());
     } else {
       console.error("CAYLON: Got too many javascript errors, stopping remote javascript execution");
@@ -169,7 +144,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
 
   return (
     <PanelSection>
-      <Elements items={items}/>
+      <Elements
+        items={items}
+        displayErrors={displayErrors}
+        displayCallback={displayCallback}
+        schedule={scheduleCall} />
       <About about={about}/>
       <PanelSectionRow>
         <ButtonItem

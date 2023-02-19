@@ -7,11 +7,12 @@ const USDPL_PORT: number = 25717;
 export function resolve<T>(promise: Promise<T>, setter: (x: T) => void) {
     (async function () {
         let data = await promise;
-        if (data != null) {
+        if (data) {
             console.debug("Got resolved", data);
             setter(data);
         } else {
-            console.warn("Resolve failed:", data);
+            console.warn("Resolve may have failed:", data);
+            setter(data);
         }
     })();
 }

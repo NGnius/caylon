@@ -51,7 +51,7 @@ impl AsyncCallable for GetJavascriptEndpoint {
             Ok(_) => {
                 match super::async_utils::channel_recv(receiver).await {
                     Err(_) => {
-                            let msg = "Failed to response for get_javascript";
+                            let msg = "Failed to get response for get_javascript";
                             log::warn!("{}", msg);
                             vec![ApiJavascriptResult::failure(msg, "receiving channel disconnected").to_primitive()]
                     },
