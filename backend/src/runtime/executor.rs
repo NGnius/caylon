@@ -4,7 +4,7 @@ use std::sync::mpsc::{self, Receiver, Sender};
 
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::{BaseConfig, ElementConfig};
+use caylon_config::{BaseConfig, ElementConfig};
 use crate::api::SteamEvent;
 use super::{QueueItem, QueueAction, Act, SeqAct};
 use super::{ResultRouter, RouterCommand, JavascriptRouter, JavascriptCommand};

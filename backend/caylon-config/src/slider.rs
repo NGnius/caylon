@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 use super::TopLevelActionConfig;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct SliderConfig {
     pub title: String,
     pub min: u64,

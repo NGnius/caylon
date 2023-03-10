@@ -3,7 +3,7 @@ use usdpl_back::core::serdes::Primitive;
 
 use crate::runtime::primitive_utils;
 
-use crate::config::{TransformAction, TransformTypeAction, ReplaceTransformAction, ExpandTransformAction, LogTransformAction, LogLevel, PatternConfig};
+use caylon_config::{TransformAction, TransformTypeAction, ReplaceTransformAction, ExpandTransformAction, LogTransformAction, LogLevel, PatternConfig};
 use super::{SeqAct, ActError};
 
 /// Changes the output or input of an act

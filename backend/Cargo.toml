@@ -8,6 +8,7 @@ license = "MIT"
 repository = "https://github.com/NGnius/kaylon"
 
 [dependencies]
+caylon-config = { version = "0.1.0", path = "./caylon-config" }
 usdpl-back = { version = "0.10.0"}
 
 clap = { version = "3.2", features = ["derive", "std"], default-features = false }

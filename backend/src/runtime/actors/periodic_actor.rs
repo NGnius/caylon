@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::ReadingConfig;
+use caylon_config::ReadingConfig;
 use super::{Act, SeqAct, ActError, TopLevelActorType};
 use crate::runtime::{RouterCommand, RuntimeIO};
 

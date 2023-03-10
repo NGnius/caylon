@@ -2,7 +2,7 @@ use usdpl_back::core::serdes::Primitive;
 
 use jmespath::{Expression, Variable};
 
-use crate::config::JsonAction;
+use caylon_config::JsonAction;
 use super::{SeqAct, ActError};
 
 pub struct JsonActor {

@@ -1,6 +1,6 @@
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::SequenceAction;
+use caylon_config::SequenceAction;
 use super::{SeqAct, ActError, ActorType};
 
 pub struct SequenceActor {

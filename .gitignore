@@ -46,6 +46,7 @@ yalc.lock
 /backend/target
 /backend/out
 /bin
+/**/target/
 
 # packaged teasers
 *.zip

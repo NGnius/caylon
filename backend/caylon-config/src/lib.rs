@@ -25,7 +25,7 @@ pub use transformer::{TransformAction, TransformTypeAction, ReplaceTransformActi
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[test]
     fn dump_test() {
         let conf = BaseConfig::V0 {

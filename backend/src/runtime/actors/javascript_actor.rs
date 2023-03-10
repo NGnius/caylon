@@ -2,7 +2,7 @@ use std::sync::mpsc::{Sender, self};
 
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::JavascriptAction;
+use caylon_config::JavascriptAction;
 use super::{SeqAct, ActError};
 use crate::runtime::{RuntimeIO, JavascriptCommand, Javascript};
 

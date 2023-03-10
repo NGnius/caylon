@@ -1,0 +1,290 @@
+html,
+body {
+  height: 100%;
+  width: 98%;
+  margin: 0;
+  padding: 1%;
+}
+
+div.work-view {
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  width: 100%;
+}
+
+div.json-view {
+  padding: 0;
+  margin: auto 0;
+  display: inline-block;
+  width: 40%;
+  vertical-align: middle;
+}
+
+.json-input {
+  margin: auto;
+  width: 98%;
+}
+
+div.elements-view {
+  padding: 0;
+  margin: auto;
+  display: inline-block;
+  width: 60%;
+  text-align: center;
+  vertical-align: top;
+}
+
+/* Element styling */
+
+// *
+
+div.caylon-element {}
+
+// actions/*
+
+div.caylon-action-config {}
+
+// actions/command.rs
+
+div.caylon-command-action-edit {}
+
+// actions/javascript.rs
+
+div.caylon-javascript-action-edit {}
+
+// actions/json.rs
+
+div.caylon-json-action-edit {}
+
+// actions/mirror.rs
+
+div.caylon-mirror-action-edit {}
+
+// actions/transform.rs
+
+div.caylon-transformer-replace-item {}
+
+div.caylon-transformer-replace {}
+
+div.caylon-transformer-expand {}
+
+div.caylon-transformer-log {}
+
+div.caylon-transformer-action-edit {}
+
+div.caylon-transformer-type-action-edit {}
+
+// add_element.rs
+
+div.add-element {}
+
+button.add-element-button {}
+
+// button.rs
+
+div.caylon-button {}
+
+// fake/button.rs
+
+button.fake-button {}
+
+// edit/*
+
+div.caylon-edit {}
+
+label.caylon-label-edit {}
+
+input.caylon-input-editor {}
+
+// edit/action_editor.rs
+
+div.caylon-action-edit {}
+
+div.caylon-sequence-action-edit {}
+
+div.caylon-sequence-command-action {}
+
+div.caylon-sequence-transform-action {}
+
+div.caylon-sequence-javascript-action {}
+
+div.caylon-sequence-json-action {}
+
+div.caylon-sequence-action-edit-item {}
+
+div.caylon-sequence-action-edit {}
+
+div.caylon-action-config {}
+
+div.caylon-editor {}
+
+// edit/always_str.rs
+
+div.caylon-always-str-edit {}
+
+input.caylon-always-str-input {}
+
+// edit/always_usize.rs
+
+div.caylon-always-usize-edit {}
+
+input.caylon-always-usize-input {}
+
+// edit/optional_str.rs
+
+div.caylon-option-str-edit {}
+
+input.caylon-option-str-input {}
+
+// edit/optional_u64.rs
+
+div.caylon-option-u64-edit {}
+
+input.caylon-option-u64-input {}
+
+// elements.rs
+
+div.elements-view {}
+
+div.elements-toolbar {}
+
+div.elements-list {}
+
+div.elements-item {}
+
+// event_display.rs
+
+div.caylon-event-display {}
+
+// reading_display.rs
+
+div.caylon-reading-display {}
+
+// reading_display.rs
+
+div.caylon-reading-display {}
+
+// remove_element.rs
+
+div.remove-element {}
+
+button.remove-element-button {}
+
+// result_display.rs
+
+div.caylon-result-display {}
+
+// fake/display.rs
+
+div.fake-slider {}
+
+span.fake-slider-title {}
+
+input.fake-slider-content {}
+
+// slider.rs
+
+div.caylon-slider {}
+
+// fake/slider.rs
+
+div.fake-slider {}
+
+span.fake-slider-title {}
+
+input.fake-slider-input {}
+
+// toggle.rs
+
+div.caylon-toggle {}
+
+// fake/toggle.rs
+// adapted from https://www.w3schools.com/howto/howto_css_switch.asp
+.fake-toggle-button {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.fake-toggle-button input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-round {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.toggle-round:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .toggle-round {
+  background-color: #2196F3;
+}
+
+input:focus + .toggle-round {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .toggle-round:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.toggle-round {
+  border-radius: 34px;
+}
+
+.toggle-round:before {
+  border-radius: 50%;
+}
+
+/* End element styling */
+
+div.footer {
+  width: 98%;
+  height: 5%;
+  margin: auto;
+  text-align: right;
+}
+
+.footer-elem {
+  display: inline-block;
+  padding: 0% 4%;
+}
+
+div.header {
+  width: 98%;
+  height: 10%;
+  margin: auto;
+  text-align: center;
+}
+
+.header-elem {
+  display: inline-block;
+}
+
+.hit-count {
+  margin: auto;
+}

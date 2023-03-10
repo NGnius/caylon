@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 use super::TopLevelActionConfig;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct EventDisplayConfig {
     pub title: String,
     /// Type of event to listen for
@@ -11,7 +11,7 @@ pub struct EventDisplayConfig {
     pub on_event: TopLevelActionConfig,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum EventType {
     #[serde(rename = "achievement")]
     Achievement,

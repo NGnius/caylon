@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "action")]
 pub enum TopLevelActionConfig {
     #[serde(rename = "sequence")]
@@ -17,7 +17,7 @@ pub enum TopLevelActionConfig {
     Json(JsonAction),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "action")]
 pub enum ActionConfig {
     #[serde(rename = "command")]
@@ -30,25 +30,25 @@ pub enum ActionConfig {
     Json(JsonAction),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct SequenceAction {
     pub steps: Vec<ActionConfig>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CommandAction {
     pub run: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct MirrorAction;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct JavascriptAction {
     pub run: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct JsonAction {
     pub jmespath: String,
 }

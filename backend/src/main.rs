@@ -1,6 +1,5 @@
 mod api;
 mod cli;
-mod config;
 mod consts;
 mod runtime;
 
@@ -20,7 +19,7 @@ fn main() -> Result<(), ()> {
 
     let filepath = cli_args.config.unwrap_or(consts::FILEPATH.into());
 
-    let kaylon_conf = config::BaseConfig::load(&filepath);
+    let kaylon_conf = caylon_config::BaseConfig::load(&filepath);
     let (executor, sender) = runtime::RuntimeExecutor::new(kaylon_conf, filepath);
 
     log::info!("Starting back-end ({} v{})", consts::PACKAGE_NAME, consts::PACKAGE_VERSION);

@@ -1,0 +1,41 @@
+[package]
+name = "caylon-studio"
+version = "0.1.0"
+edition = "2021"
+description = "Template for starting a Yew project using Trunk"
+readme = "README.md"
+repository = "https://github.com/yewstack/yew-trunk-minimal-template"
+license = "MIT"
+keywords = ["yew", "trunk"]
+categories = ["gui", "wasm", "web-programming"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "frontend"
+
+[[bin]]
+name = "backend"
+
+[dependencies]
+caylon-config = { version = "0.1.0", path = "../caylon-config" }
+reqwest = { version = "0.11.8", features = ["json"] }
+serde = { version = "1.0.132", features = ["derive"] }
+serde_json = { version = "1.0" }
+uuid = { version = "1.0.0", features = ["serde"] }
+futures = "0.3"
+bytes = "1.0"
+log = "0.4"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+yew = { version = "0.20", features = [ "csr", "hydration" ] }
+wasm-bindgen-futures = "0.4"
+wasm-log = "0.3"
+web-sys = { version = "0.3", features = [ "HtmlSelectElement", "HtmlInputElement" ] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+yew = { version = "0.20", features = [ "ssr" ] }
+tokio = { version = "1", features = ["full"] }
+actix-web = { version = "4.3" }
+actix-files = { version = "0.6" }
+clap = { version = "3.1.7", features = ["derive"] }
+simplelog = { version = "0.12" }

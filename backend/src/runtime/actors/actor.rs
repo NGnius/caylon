@@ -1,6 +1,6 @@
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::{ElementConfig, ActionConfig, TopLevelActionConfig};
+use caylon_config::{ElementConfig, ActionConfig, TopLevelActionConfig};
 
 pub type ActError = String;
 

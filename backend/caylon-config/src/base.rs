@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 use super::{ElementConfig, AboutConfig};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "api-version")]
 pub enum BaseConfig {
     #[serde(rename = "v0.0.0")]
@@ -54,5 +54,9 @@ impl BaseConfig {
         match self {
             Self::V0 {items, ..} => items,
         }
+    }
+
+    pub fn assemble(items: Vec<ElementConfig>, about: AboutConfig) -> Self {
+        Self::V0 { items, about }
     }
 }

@@ -2,7 +2,7 @@ use std::process::Command;
 
 use usdpl_back::core::serdes::Primitive;
 
-use crate::config::CommandAction;
+use caylon_config::CommandAction;
 use super::{SeqAct, ActError};
 
 /// Runs a CLI command in Bash

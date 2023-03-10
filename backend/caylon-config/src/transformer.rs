@@ -2,12 +2,12 @@
 
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct TransformAction {
     pub transformer: TransformTypeAction,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 #[serde(tag = "rule")]
 pub enum TransformTypeAction {
     #[serde(rename = "replace")]
@@ -18,13 +18,13 @@ pub enum TransformTypeAction {
     Log(LogTransformAction),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ReplaceTransformAction {
     /// Regex
     pub patterns: Vec<PatternConfig>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct PatternConfig {
     /// Regex
     pub pattern: String,
@@ -43,17 +43,17 @@ pub struct PatternConfig {
     pub x: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ExpandTransformAction {
     pub format: String,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct LogTransformAction {
     pub level: LogLevel,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum LogLevel {
     DEBUG,
     INFO,
