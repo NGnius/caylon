@@ -157,7 +157,7 @@ impl Component for ActionComponent {
                     html! {
                         <div class={classes!("caylon-sequence-action-edit-item")}>
                             // dropdown to change action
-                            <label>{"Action"}</label>
+                            <label class={classes!("caylon-label-edit")}>{"Action"}</label>
                             <select onchange={dropdown_cb} autocomplete={"off"}>
                                 <option value={"command"}
                                     selected={selected == SelectedActionConfig::Command}

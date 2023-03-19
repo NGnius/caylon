@@ -152,7 +152,7 @@ impl Component for TransformActionComponent {
                 });
                 html! {
                     <div class={classes!("caylon-transformer-log")}>
-                        <label>{"Log level"}</label>
+                        <label class={classes!("caylon-label-edit")}>{"Log level"}</label>
                         <select onchange={log_cb} autocomplete={"off"}>
                             <option value={"debug"}
                                 selected={log.level == caylon_config::LogLevel::DEBUG}
@@ -180,7 +180,7 @@ impl Component for TransformActionComponent {
         };
         html! {
             <div class={classes!("caylon-transformer-action-edit", "caylon-action-config")}>
-                <label>{"Type"}</label>
+                <label class={classes!("caylon-label-edit")}>{"Type"}</label>
                 <select onchange={dropdown_cb} autocomplete={"off"}>
                     <option value={"replace"}
                         selected={selected == SelectedTransformer::Replace}

@@ -4,6 +4,10 @@ body {
   width: 98%;
   margin: 0;
   padding: 1%;
+  background: #ffffff;
+  color: #444444;
+  vertical-align: middle;
+  text-align: left;
 }
 
 div.work-view {
@@ -35,11 +39,73 @@ div.elements-view {
   vertical-align: top;
 }
 
+/* HTML styling */
+
+button {
+  border: 2px solid #555555;
+  background: #dddddd;
+  margin: 0.25em;
+  //padding: 0.25em;
+  border-radius: 0.5em;
+  text-align: center;
+}
+
+button:hover {
+  background: #aaaaaa;
+}
+
+button:active {
+  background: #888888;
+}
+
+select {
+  border: 2px solid #555555;
+  background: #dddddd;
+  margin: 0.25em;
+  border-radius: 0.5em;
+}
+
+select:hover {
+  background: #aaaaaa;
+}
+
+input {
+  border: 2px solid #555555;
+  background: #dddddd;
+  margin: 0.25em;
+  border-radius: 0.5em;
+}
+
+input:hover {
+  background: #aaaaaa;
+}
+
+textarea {
+  border: 2px solid #555555;
+  background: #dddddd;
+  margin: 0.25em;
+  border-radius: 0.5em;
+}
+
+textarea:hover {
+  background: #aaaaaa;
+}
+
+label {
+  padding: 2%;
+  margin: auto;
+  vertical-align: middle;
+  text-align: center;
+}
+
 /* Element styling */
 
 // *
 
-div.caylon-element {}
+div.caylon-element {
+  display: inline-block;
+  width: 100%;
+}
 
 // actions/*
 
@@ -77,9 +143,14 @@ div.caylon-transformer-type-action-edit {}
 
 // add_element.rs
 
-div.add-element {}
+div.add-element {
+  padding: 0;
+  margin: auto;
+}
 
-button.add-element-button {}
+button.add-element-button {
+  width: 24px;
+}
 
 // button.rs
 
@@ -87,7 +158,35 @@ div.caylon-button {}
 
 // fake/button.rs
 
-button.fake-button {}
+div.fake-button {
+  display: inline-block;
+  width: clamp(250px, 75%, 350px);
+  margin: auto;
+  padding: 8px 16px;
+  font-family: "Motiva Sans","Twemoji","Noto Sans",Helvetica,sans-serif;
+  background: #202020;
+  color: #ffffff;
+  --field-row-children-spacing: 10px;
+  text-align: left;
+  border-radius: 2px;
+}
+
+button.fake-button-button {
+  width: 100%;
+  background: #23262e;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  height: 40px;
+  text-align: center;
+  line-height: 20px;
+}
+
+button.fake-button-button:hover {
+  width: 100%;
+  background: #ffffff;
+  color: #23262e;
+}
 
 // edit/*
 
@@ -117,13 +216,24 @@ div.caylon-sequence-action-edit {}
 
 div.caylon-action-config {}
 
-div.caylon-editor {}
+div.caylon-editor {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+  margin: auto;
+  padding: 1%;
+  width: clamp(300px, 48%, 400px);
+}
 
 // edit/always_str.rs
 
-div.caylon-always-str-edit {}
+div.caylon-always-str-edit {
+  margin: auto;
+}
 
-input.caylon-always-str-input {}
+input.caylon-always-str-input {
+  width: clamp(100px, 75%, 400px);
+}
 
 // edit/always_usize.rs
 
@@ -147,11 +257,27 @@ input.caylon-option-u64-input {}
 
 div.elements-view {}
 
-div.elements-toolbar {}
+div.elements-toolbar {
+  width: 100%;
+  display: inline-block;
+  margin: auto;
+}
 
-div.elements-list {}
+div.elements-list {
+  width: 100%;
+  display: inline-block;
+  padding: 2% 0;
+}
 
-div.elements-item {}
+div.elements-item {
+  width: 100%;
+  display: inline-block;
+  margin: auto;
+  padding: 2%;
+  border: none;
+  border-bottom: 2px solid #555555;
+  border-radius: 0.5em;
+}
 
 // event_display.rs
 
@@ -167,9 +293,14 @@ div.caylon-reading-display {}
 
 // remove_element.rs
 
-div.remove-element {}
+div.remove-element {
+  display: inline-block;
+  //width: clamp(25px, 50%, 200px);
+}
 
-button.remove-element-button {}
+button.remove-element-button {
+  width: 24px;
+}
 
 // result_display.rs
 
@@ -177,35 +308,120 @@ div.caylon-result-display {}
 
 // fake/display.rs
 
-div.fake-slider {}
 
-span.fake-slider-title {}
+div.fake-display {
+  display: inline-block;
+  width: clamp(250px, 75%, 350px);
+  margin: auto;
+  padding: 8px 16px;
+  font-family: "Motiva Sans","Twemoji","Noto Sans",Helvetica,sans-serif;
+  background: #202020;
+  color: #ffffff;
+  --field-row-children-spacing: 10px;
+  text-align: left;
+  border-radius: 2px;
+}
 
-input.fake-slider-content {}
+span.fake-display-content {
+  color: #969696;
+  text-align: right;
+  float: right;
+}
+
+span.fake-display-title {
+  color: #ffffff;
+  text-align: left;
+  float: left;
+}
+
+// fake/slider.rs
+
+div.fake-slider {
+  display: inline-block;
+  width: clamp(250px, 75%, 350px);
+  margin: auto;
+  padding: 8px 16px;
+  font-family: "Motiva Sans","Twemoji","Noto Sans",Helvetica,sans-serif;
+  background: #202020;
+  color: #ffffff;
+  --field-row-children-spacing: 10px;
+  text-align: left;
+  border-radius: 2px;
+  //height: 40px;
+}
+
+span.fake-slider-title {
+  width: 100%;
+  text-align: left;
+  float: left;
+}
+
+input.fake-slider-input {
+  width: 100%;
+  border: none;
+  background: inherit;
+}
+
+
+
+input.fake-slider-input::-webkit-slider-runnable-track {
+    background-color: #1a9fff;
+}
+input.fake-slider-input::-moz-range-track {
+    background-color: #1a9fff;
+}
+
+input.fake-slider-input::-webkit-slider-thumb {
+    background-color: white;
+}
+input.fake-slider-input::-moz-range-thumb {
+    background-color: white;
+    border: none;
+}
+
+
 
 // slider.rs
 
 div.caylon-slider {}
-
-// fake/slider.rs
-
-div.fake-slider {}
-
-span.fake-slider-title {}
-
-input.fake-slider-input {}
 
 // toggle.rs
 
 div.caylon-toggle {}
 
 // fake/toggle.rs
+
+div.fake-toggle {
+  display: inline-block;
+  width: clamp(250px, 75%, 350px);
+  margin: auto;
+  padding: 8px 16px;
+  font-family: "Motiva Sans","Twemoji","Noto Sans",Helvetica,sans-serif;
+  background: #202020;
+  color: #ffffff;
+  --field-row-children-spacing: 10px;
+  text-align: left;
+  border-radius: 2px;
+}
+
+span.fake-toggle-title {
+  display: inline-block;
+  vertical-align: middle;
+  margin: auto;
+  height: 22px;
+  line-height: 22px;
+  padding: 0;
+}
+
 // adapted from https://www.w3schools.com/howto/howto_css_switch.asp
+// I spent way too much time making this slider line up, don't fall into this trap again
 .fake-toggle-button {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  float: right;
 }
 
 .fake-toggle-button input {
@@ -229,27 +445,27 @@ div.caylon-toggle {}
 .toggle-round:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 22px;
+  width: 22px;
+  left: 0px;
+  bottom: 0px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
 }
 
 input:checked + .toggle-round {
-  background-color: #2196F3;
+  background-color: #1a9fff;
 }
 
 input:focus + .toggle-round {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #1a9fff;
 }
 
 input:checked + .toggle-round:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(18px);
+  -ms-transform: translateX(18px);
+  transform: translateX(18px);
 }
 
 .toggle-round {
@@ -266,6 +482,7 @@ div.footer {
   width: 98%;
   height: 5%;
   margin: auto;
+  padding: 2%;
   text-align: right;
 }
 

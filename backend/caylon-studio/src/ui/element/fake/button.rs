@@ -10,6 +10,8 @@ pub struct FakeButtonProps {
 #[function_component]
 pub fn FakeButtonComponent(props: &FakeButtonProps) -> Html {
     html! {
-         <button type="button" class={classes!("fake-button")}>{props.config.title.clone()}</button>
+        <div class={classes!("fake-button")}>
+            <button type="button" class={classes!("fake-button-button")}>{props.config.title.clone()}</button>
+        </div>
     }
 }
